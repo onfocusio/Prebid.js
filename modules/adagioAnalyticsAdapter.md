@@ -1,6 +1,6 @@
 # Overview
 
-Module Name: Adagio Analytics Adapter
+Module Name: Adagio Bid Adapter
 Module Type: Adagio Adapter
 Maintainer: dev@adagio.io
 
