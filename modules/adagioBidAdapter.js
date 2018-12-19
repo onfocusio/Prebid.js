@@ -1,8 +1,7 @@
 import find from 'core-js/library/fn/array/find';
-import * as utils from '../src/utils';
-import { registerBidder } from '../src/adapters/bidderFactory';
-
-const prebidTimeout = parseInt(config.getConfig('bidderTimeout'), 10);
+import * as utils from 'src/utils';
+import { registerBidder } from 'src/adapters/bidderFactory';
+import { config } from '../src/config';
 
 const BIDDER_CODE = 'adagio';
 const VERSION = '1.0.0';
@@ -11,7 +10,7 @@ const SUPPORTED_MEDIA_TYPES = ['banner'];
 const ADAGIO_TAG_URL = '//script.4dex.io/localstore.js';
 const ADAGIO_TAG_TO_LOCALSTORE = '//script.4dex.io/adagio.js';
 const ADAGIO_LOCALSTORE_KEY = 'adagioScript';
-const LOCALSTORE_TIMEOUT = (prebidTimeout / 2) < 100 ? 100 : prebidTimeout / 2;
+const LOCALSTORE_TIMEOUT = parseInt(config.getConfig('bidderTimeout'), 10) + 250;
 const script = document.createElement('script');
 
 const getAdagioTag = function getAdagioTag() {
@@ -82,19 +81,15 @@ function _getPageviewId() {
 
 function _getFeatures(bidRequest) {
   if (!window.top._ADAGIO || !window.top._ADAGIO.features) {
+    utils.logWarn('adagio.js not found');
     return {};
   }
 
+  utils.logInfo('Call to adagio.js');
+
   const rawFeatures = window.top._ADAGIO.features.getFeatures(
-    document.getElementById(bidRequest.adUnitCode),
-    function(features) {
-      return {
-        site_id: bidRequest.params.siteId,
-        placement: bidRequest.params.placementId,
-        pagetype: bidRequest.params.pagetypeId,
-        categories: bidRequest.params.categories
-      };
-    }
+    document.getElementById(bidRequest.params.adUnitElementId),
+    {debug: config.getConfig('debug')}
   );
   return rawFeatures;
 }
@@ -115,17 +110,14 @@ function _getGdprConsent(bidderRequest) {
   return consent;
 }
 
-// Extra data returned by Adagio SSP Engine
-function _setData(data) {
-  window.top.ADAGIO = window.top.ADAGIO || {};
-  window.top.ADAGIO.queue = window.top.ADAGIO.queue || [];
-  // if (window.top.ADAGIO && window.top.ADAGIO.queue) {
-  window.top.ADAGIO.queue.push({
-    action: 'ssp-data',
-    ts: Date.now(),
-    data: data,
-  });
-  // }
+function _setPredictions(predictions) {
+  if (window.top.ADAGIO && window.top.ADAGIO.queue) {
+    window.top.ADAGIO.queue.push({
+      action: 'set-predictions',
+      ts: Date.now(),
+      predictions: predictions,
+    });
+  }
 }
 
 export const spec = {
@@ -134,7 +126,7 @@ export const spec = {
   supportedMediaType: SUPPORTED_MEDIA_TYPES,
 
   isBidRequestValid: function(bid) {
-    return !!(bid.params.siteId && bid.params.placementId);
+    return !!(bid.params.organizationId && bid.params.site && bid.params.placement && bid.params.pagetype && bid.params.adUnitElementId && document.getElementById(bid.params.adUnitElementId) !== null);
   },
 
   buildRequests: function(validBidRequests, bidderRequest) {
@@ -144,33 +136,29 @@ export const spec = {
     const pageviewId = _getPageviewId();
     const gdprConsent = _getGdprConsent(bidderRequest);
     const adUnits = utils._map(validBidRequests, (bidRequest) => {
-      bidRequest.params.features = _getFeatures(bidRequest);
-      const categories = bidRequest.params.categories;
-      if (typeof categories !== 'undefined' && !Array.isArray(categories)) {
-        bidRequest.params.categories = [categories];
-      }
+      bidRequest.features = _getFeatures(bidRequest);
       return bidRequest;
     });
 
     // Regroug ad units by siteId
     const groupedAdUnits = adUnits.reduce((groupedAdUnits, adUnit) => {
-      (groupedAdUnits[adUnit.params.siteId] = groupedAdUnits[adUnit.params.siteId] || []).push(adUnit);
+      (groupedAdUnits[adUnit.params.organizationId] = groupedAdUnits[adUnit.params.organizationId] || []).push(adUnit);
       return groupedAdUnits;
     }, {});
 
     // Build one request per siteId
-    const requests = utils._map(Object.keys(groupedAdUnits), (siteId) => {
+    const requests = utils._map(Object.keys(groupedAdUnits), (organizationId) => {
       return {
         method: 'POST',
         url: ENDPOINT,
         data: {
           id: utils.generateUUID(),
+          organizationId: organizationId,
           secure: secure,
           device: device,
           site: site,
-          siteId: siteId,
           pageviewId: pageviewId,
-          adUnits: groupedAdUnits[siteId],
+          adUnits: groupedAdUnits[organizationId],
           gdpr: gdprConsent,
           adapterVersion: VERSION
         },
@@ -188,8 +176,8 @@ export const spec = {
     try {
       const response = serverResponse.body;
       if (response) {
-        if (response.data) {
-          _setData(response.data)
+        if (response.predictions) {
+          _setPredictions(response.predictions)
         }
         if (response.bids) {
           response.bids.forEach(bidObj => {
