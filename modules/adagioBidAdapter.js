@@ -2,10 +2,40 @@ import find from 'core-js/library/fn/array/find';
 import * as utils from '../src/utils';
 import { registerBidder } from '../src/adapters/bidderFactory';
 
+const prebidTimeout = parseInt(config.getConfig('bidderTimeout'), 10);
+
 const BIDDER_CODE = 'adagio';
 const VERSION = '1.0.0';
 const ENDPOINT = 'https://mp.4dex.io/prebid';
 const SUPPORTED_MEDIA_TYPES = ['banner'];
+const ADAGIO_TAG_URL = '//script.4dex.io/localstore.js';
+const ADAGIO_TAG_TO_LOCALSTORE = '//script.4dex.io/adagio.js';
+const ADAGIO_LOCALSTORE_KEY = 'adagioScript';
+const LOCALSTORE_TIMEOUT = (prebidTimeout / 2) < 100 ? 100 : prebidTimeout / 2;
+const script = document.createElement('script');
+
+const getAdagioTag = function getAdagioTag() {
+  const ls = window.top.localStorage.getItem('adagioScript');
+  if (ls !== null) {
+    Function(ls)(); // eslint-disable-line no-new-func
+  } else {
+    utils.logWarn('Adagio Script not found');
+  }
+}
+
+// First, try to load adagio-js from localStorage.
+getAdagioTag();
+
+// Then prepare localstore.js to update localStorage adagio-sj script with
+// the very last version.
+script.type = 'text/javascript';
+script.async = true;
+script.src = ADAGIO_TAG_URL;
+script.setAttribute('data-key', ADAGIO_LOCALSTORE_KEY);
+script.setAttribute('data-src', ADAGIO_TAG_TO_LOCALSTORE);
+setTimeout(function() {
+  utils.insertElement(script);
+}, LOCALSTORE_TIMEOUT);
 
 /**
  * Based on https://github.com/ua-parser/uap-cpp/blob/master/UaParser.cpp#L331, with the following updates:
