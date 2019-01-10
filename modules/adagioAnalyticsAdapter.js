@@ -2,20 +2,29 @@
  * Analytics Adapter for Adagio
  */
 
-import adapter from '../src/AnalyticsAdapter';
-import adapterManager from '../src/adapterManager';
+import adapter from 'src/AnalyticsAdapter';
+import adaptermanager from 'src/adaptermanager';
+import CONSTANTS from 'src/constants.json';
 
-// This config makes Prebid.js call this function on each event:
-//   `window['AdagioPrebidAnalytics']('on', eventType, args)`
-// If it is missing, then Prebid.js will immediately log an error,
-// instead of queueing the events until the function appears.
-var adagioAdapter = adapter({
-  global: 'AdagioPrebidAnalytics',
-  handler: 'on',
-  analyticsType: 'bundle'
+const emptyUrl = '';
+const analyticsType = 'endpoint';
+
+window.top.adagioAdapterQueue = window.top.adagioAdapterQueue || [];
+
+const events = Object.values(CONSTANTS.EVENTS);
+
+let adagioAdapter = Object.assign(adapter({ emptyUrl, analyticsType }), {
+  track({ eventType, args }) {
+    if (typeof args !== 'undefined' && events.indexOf(eventType) !== -1) {
+      window.top.adagioAdapterQueue.push({
+        eventType: eventType,
+        args: args
+      });
+    }
+  }
 });
 
-adapterManager.registerAnalyticsAdapter({
+adaptermanager.registerAnalyticsAdapter({
   adapter: adagioAdapter,
   code: 'adagio'
 });
