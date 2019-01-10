@@ -3,6 +3,8 @@ import * as utils from 'src/utils';
 import { registerBidder } from 'src/adapters/bidderFactory';
 import { config } from '../src/config';
 
+const prebidTimeout = parseInt(config.getConfig('bidderTimeout'), 10);
+
 const BIDDER_CODE = 'adagio';
 const VERSION = '1.0.0';
 const ENDPOINT = 'https://mp.4dex.io/prebid';
@@ -10,7 +12,7 @@ const SUPPORTED_MEDIA_TYPES = ['banner'];
 const ADAGIO_TAG_URL = '//script.4dex.io/localstore.js';
 const ADAGIO_TAG_TO_LOCALSTORE = '//script.4dex.io/adagio.js';
 const ADAGIO_LOCALSTORE_KEY = 'adagioScript';
-const LOCALSTORE_TIMEOUT = parseInt(config.getConfig('bidderTimeout'), 10) + 250;
+const LOCALSTORE_TIMEOUT = (prebidTimeout / 2) < 100 ? 100 : prebidTimeout / 2;
 const script = document.createElement('script');
 
 const getAdagioTag = function getAdagioTag() {
