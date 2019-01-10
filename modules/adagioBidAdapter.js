@@ -85,6 +85,17 @@ function _getGdprConsent(bidderRequest) {
   return consent;
 }
 
+// Extra data returned by Adagio SSP Engine
+function _setData(data) {
+  if (window.top.ADAGIO && window.top.ADAGIO.queue) {
+    window.top.ADAGIO.queue.push({
+      action: 'ssp-data',
+      ts: Date.now(),
+      data: data,
+    });
+  }
+}
+
 export const spec = {
   code: BIDDER_CODE,
 
@@ -145,15 +156,23 @@ export const spec = {
     try {
       const response = serverResponse.body;
       if (response) {
-        response.bids.forEach(bidObj => {
-          const bidReq = (find(bidRequest.data.adUnits, bid => bid.bidId === bidObj.requestId));
-          if (bidReq) {
-            bidObj.placementId = bidReq.params.placementId;
-            bidObj.pagetypeId = bidReq.params.pagetypeId;
-            bidObj.categories = (bidReq.params.features && bidReq.params.features.categories) ? bidReq.params.features.categories : [];
-          }
-          bidResponses.push(bidObj);
-        });
+        if (response.data) {
+          _setData(response.data)
+        }
+        if (response.bids) {
+          response.bids.forEach(bidObj => {
+            const bidReq = (find(bidRequest.data.adUnits, bid => bid.bidId === bidObj.requestId));
+            if (bidReq) {
+              bidObj.site = bidReq.params.site;
+              bidObj.placement = bidReq.params.placement;
+              bidObj.pagetype = bidReq.params.pagetype;
+              bidObj.category = bidReq.params.category;
+              bidObj.subcategory = bidReq.params.subcategory;
+              bidObj.environment = bidReq.params.environment;
+            }
+            bidResponses.push(bidObj);
+          });
+        }
       }
     } catch (err) {
       utils.logError(err);
