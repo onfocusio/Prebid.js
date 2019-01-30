@@ -3,7 +3,7 @@
  */
 
 import adapter from 'src/AnalyticsAdapter';
-import adaptermanager from 'src/adaptermanager';
+import adapterManager from 'src/adapterManager';
 import CONSTANTS from 'src/constants.json';
 
 const emptyUrl = '';
@@ -26,7 +26,7 @@ let adagioAdapter = Object.assign(adapter({ emptyUrl, analyticsType }), {
   }
 });
 
-adaptermanager.registerAnalyticsAdapter({
+adapterManager.registerAnalyticsAdapter({
   adapter: adagioAdapter,
   code: 'adagio'
 });
