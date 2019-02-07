@@ -45,13 +45,13 @@ const adagioEnqueue = function adagioEnqueue(actionName, eventName, event) {
   });
 }
 
-top.googletag = window.googletag || {};
-top.googletag.cmd = googletag.cmd || [];
+top.googletag = top.googletag || {};
+top.googletag.cmd = top.googletag.cmd || [];
 top.googletag.cmd.push(function() {
   const gptEvents = Object.values(ADSRV_EVENTS.GPT);
   gptEvents.forEach(gptEventName => {
     console.log(`enqueue ${gptEventName}`);
-    googletag.pubads().addEventListener(gptEventName, event => {
+    top.googletag.pubads().addEventListener(gptEventName, event => {
       adagioEnqueue('gpt-event', gptEventName, event);
     });
   });
