@@ -50,7 +50,6 @@ googletag.cmd = googletag.cmd || [];
 googletag.cmd.push(function() {
   const gptEvents = Object.values(ADSRV_EVENTS.GPT);
   gptEvents.forEach(gptEventName => {
-    console.log(`enqueue ${gptEventName}`);
     googletag.pubads().addEventListener(gptEventName, event => {
       adagioEnqueue('gpt-event', gptEventName, event);
     });
