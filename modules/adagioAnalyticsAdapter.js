@@ -8,7 +8,7 @@ import CONSTANTS from 'src/constants.json';
 
 const emptyUrl = '';
 const analyticsType = 'endpoint';
-const events = Object.values(CONSTANTS.EVENTS);
+const events = Object.keys(CONSTANTS.EVENTS).map(key => CONSTANTS.EVENTS[key]);
 
 const ADSRV_EVENTS = {
   GPT: {
@@ -48,7 +48,7 @@ const adagioEnqueue = function adagioEnqueue(actionName, eventName, event) {
 let googletag = top.googletag || {};
 googletag.cmd = googletag.cmd || [];
 googletag.cmd.push(function() {
-  const gptEvents = Object.values(ADSRV_EVENTS.GPT);
+  const gptEvents = Object.keys(ADSRV_EVENTS.GPT).map(key => ADSRV_EVENTS.GPT[key]);
   gptEvents.forEach(gptEventName => {
     googletag.pubads().addEventListener(gptEventName, event => {
       adagioEnqueue('gpt-event', gptEventName, event);
@@ -59,7 +59,7 @@ googletag.cmd.push(function() {
 let sas = top.sas || {};
 sas.cmd = sas.cmd || [];
 sas.cmd.push(function() {
-  const sasEvents = Object.values(ADSRV_EVENTS.SAS);
+  const sasEvents = Object.keys(ADSRV_EVENTS.SAS).map(key => ADSRV_EVENTS.SAS[key]);
   sasEvents.forEach(sasEventName => {
     sas.events.on(sasEventName, function(event) {
       adagioEnqueue('sas-event', sasEventName, event);
