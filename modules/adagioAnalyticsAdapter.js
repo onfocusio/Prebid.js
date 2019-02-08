@@ -45,25 +45,23 @@ const adagioEnqueue = function adagioEnqueue(actionName, eventName, event) {
   });
 }
 
-top.googletag = top.googletag || {};
-top.googletag.cmd = top.googletag.cmd || [];
-top.googletag.cmd.push(function() {
+let googletag = top.googletag || {};
+googletag.cmd = googletag.cmd || [];
+googletag.cmd.push(function() {
   const gptEvents = Object.values(ADSRV_EVENTS.GPT);
   gptEvents.forEach(gptEventName => {
-    console.log(`enqueue ${gptEventName}`);
-    top.googletag.pubads().addEventListener(gptEventName, event => {
+    googletag.pubads().addEventListener(gptEventName, event => {
       adagioEnqueue('gpt-event', gptEventName, event);
     });
   });
 });
 
-top.sas = top.sas || {};
-top.sas.cmd = top.sas.cmd || [];
-
-top.sas.cmd.push(function() {
+let sas = top.sas || {};
+sas.cmd = sas.cmd || [];
+sas.cmd.push(function() {
   const sasEvents = Object.values(ADSRV_EVENTS.SAS);
   sasEvents.forEach(sasEventName => {
-    top.sas.events.on(sasEventName, function(event) {
+    sas.events.on(sasEventName, function(event) {
       adagioEnqueue('sas-event', sasEventName, event);
     });
   });
