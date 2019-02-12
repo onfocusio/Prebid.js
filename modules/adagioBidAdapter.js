@@ -343,7 +343,8 @@ export const spec = {
           pageviewId: pageviewId,
           adUnits: groupedAdUnits[organizationId],
           gdpr: gdprConsent,
-          adapterVersion: VERSION
+          adapterVersion: VERSION,
+          featuresVersion: FEATURES_VERSION
         },
         options: {
           contentType: 'application/json'
