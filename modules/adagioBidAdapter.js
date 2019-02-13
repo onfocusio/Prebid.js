@@ -210,7 +210,7 @@ function _getFeatures(bidRequest) {
     version: FEATURES_VERSION
   };
 
-  _setData({
+  _setFeatures({
     features: adUnitFeature
   });
 
@@ -239,6 +239,16 @@ function _setData(data) {
   window.top.ADAGIO.queue = window.top.ADAGIO.queue || [];
   window.top.ADAGIO.queue.push({
     action: 'ssp-data',
+    ts: Date.now(),
+    data: data,
+  });
+}
+
+function _setFeatures(data) {
+  window.top.ADAGIO = window.top.ADAGIO || {};
+  window.top.ADAGIO.queue = window.top.ADAGIO.queue || [];
+  window.top.ADAGIO.queue.push({
+    action: 'features',
     ts: Date.now(),
     data: data,
   });
