@@ -152,6 +152,12 @@ const _features = {
   }
 }
 
+function _pushInAdagioQueue(ob) {
+  window.top.ADAGIO = window.top.ADAGIO || {};
+  window.top.ADAGIO.queue = window.top.ADAGIO.queue || [];
+  window.top.ADAGIO.queue.push(ob);
+};
+
 function _getDevice() {
   const language = navigator.language ? 'language' : 'userLanguage';
   return {
@@ -210,8 +216,10 @@ function _getFeatures(bidRequest) {
     version: FEATURES_VERSION
   };
 
-  _setFeatures({
-    features: adUnitFeature
+  _pushInAdagioQueue({
+    action: 'features',
+    ts: Date.now(),
+    data: adUnitFeature
   });
 
   return features;
@@ -231,27 +239,6 @@ function _getGdprConsent(bidderRequest) {
     }
   }
   return consent;
-}
-
-// Extra data returned by Adagio SSP Engine
-function _setData(data) {
-  window.top.ADAGIO = window.top.ADAGIO || {};
-  window.top.ADAGIO.queue = window.top.ADAGIO.queue || [];
-  window.top.ADAGIO.queue.push({
-    action: 'ssp-data',
-    ts: Date.now(),
-    data: data,
-  });
-}
-
-function _setFeatures(data) {
-  window.top.ADAGIO = window.top.ADAGIO || {};
-  window.top.ADAGIO.queue = window.top.ADAGIO.queue || [];
-  window.top.ADAGIO.queue.push({
-    action: 'features',
-    ts: Date.now(),
-    data: data,
-  });
 }
 
 export const spec = {
@@ -312,7 +299,11 @@ export const spec = {
       const response = serverResponse.body;
       if (response) {
         if (response.data) {
-          _setData(response.data)
+          _pushInAdagioQueue({
+            action: 'ssp-data',
+            ts: Date.now(),
+            data: response.data
+          });
         }
         if (response.bids) {
           response.bids.forEach(bidObj => {
