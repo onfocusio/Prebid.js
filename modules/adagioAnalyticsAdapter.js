@@ -36,11 +36,7 @@ window.top.ADAGIO = window.top.ADAGIO || {};
 window.top.ADAGIO.queue = window.top.ADAGIO.queue || [];
 
 const adagioEnqueue = function adagioEnqueue(action, data) {
-  window.top.ADAGIO.queue.push({
-    action: action,
-    ts: Date.now(),
-    data: data,
-  });
+  window.top.ADAGIO.queue.push({ action, data, ts: Date.now() });
 }
 
 if (top.googletag) {
@@ -50,7 +46,7 @@ if (top.googletag) {
     const gptEvents = Object.keys(ADSRV_EVENTS.GPT).map(key => ADSRV_EVENTS.GPT[key]);
     gptEvents.forEach(eventName => {
       googletag.pubads().addEventListener(eventName, args => {
-        adagioEnqueue('gpt-event', {eventName: eventName, args: args});
+        adagioEnqueue('gpt-event', { eventName, args });
       });
     });
   });
@@ -63,7 +59,7 @@ if (top.sas) {
     const sasEvents = Object.keys(ADSRV_EVENTS.SAS).map(key => ADSRV_EVENTS.SAS[key]);
     sasEvents.forEach(eventName => {
       sas.events.on(eventName, args => {
-        adagioEnqueue('sas-event', {eventName: eventName, args: args});
+        adagioEnqueue('sas-event', { eventName, args });
       });
     });
   });
@@ -72,7 +68,7 @@ if (top.sas) {
 const adagioAdapter = Object.assign(adapter({ emptyUrl, analyticsType }), {
   track({ eventType, args }) {
     if (typeof args !== 'undefined' && events.indexOf(eventType) !== -1) {
-      adagioEnqueue('pb-analytics-event', {eventName: eventType, args: args});
+      adagioEnqueue('pb-analytics-event', { eventName: eventType, args });
     }
   }
 });
