@@ -88,7 +88,29 @@ describe('adagio analytics adapter', () => {
       // Step 3: Send auction end event
       events.emit(constants.EVENTS.AUCTION_END, {});
 
-      expect(window.top.ADAGIO.PBAH.q).length(3);
+      expect(window.top.ADAGIO.queue).length(3);
+
+      // [Object{action: 'prebid-analytics', ts: 1550153193700, data: Object{eventType: ..., args: ...}}, ...]
+      let o = window.top.ADAGIO.queue.shift();
+      expect(o).to.not.be.undefined;
+      expect(o.action).to.equal('pb-analytics-event');
+      expect(o.ts).to.not.be.undefined;
+      expect(o.data).to.not.be.undefined;
+      expect(o.data).to.deep.equal({eventName: constants.EVENTS.BID_REQUESTED, args: bidRequest});
+
+      o = window.top.ADAGIO.queue.shift();
+      expect(o).to.not.be.undefined;
+      expect(o.action).to.equal('pb-analytics-event');
+      expect(o.ts).to.not.be.undefined;
+      expect(o.data).to.not.be.undefined;
+      expect(o.data).to.deep.equal({eventName: constants.EVENTS.BID_RESPONSE, args: bidResponse});
+
+      o = window.top.ADAGIO.queue.shift();
+      expect(o).to.not.be.undefined;
+      expect(o.action).to.equal('pb-analytics-event');
+      expect(o.ts).to.not.be.undefined;
+      expect(o.data).to.not.be.undefined;
+      expect(o.data).to.deep.equal({eventName: constants.EVENTS.AUCTION_END, args: {}});
     });
   });
 });
