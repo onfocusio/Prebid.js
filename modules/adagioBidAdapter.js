@@ -6,7 +6,7 @@ import { config } from '../src/config';
 const prebidTimeout = parseInt(config.getConfig('bidderTimeout'), 10);
 
 const BIDDER_CODE = 'adagio';
-const VERSION = '1.0.0';
+const VERSION = '1.1.0';
 const FEATURES_VERSION = '1';
 const ENDPOINT = 'https://mp.4dex.io/prebid';
 const SUPPORTED_MEDIA_TYPES = ['banner'];
@@ -15,6 +15,11 @@ const ADAGIO_TAG_TO_LOCALSTORE = '//script.4dex.io/adagio.js';
 const ADAGIO_LOCALSTORE_KEY = 'adagioScript';
 const LOCALSTORE_TIMEOUT = (prebidTimeout / 2) < 100 ? 100 : prebidTimeout / 2;
 const script = document.createElement('script');
+
+window.top.ADAGIO = window.top.ADAGIO || {};
+window.top.ADAGIO.queue = window.top.ADAGIO.queue || [];
+window.top.ADAGIO.versions = window.top.ADAGIO.versions || {};
+window.top.ADAGIO.versions.adagioBidderAdapter = VERSION;
 
 const getAdagioTag = function getAdagioTag() {
   const ls = window.top.localStorage.getItem('adagioScript');
@@ -153,8 +158,6 @@ const _features = {
 }
 
 function _pushInAdagioQueue(ob) {
-  window.top.ADAGIO = window.top.ADAGIO || {};
-  window.top.ADAGIO.queue = window.top.ADAGIO.queue || [];
   window.top.ADAGIO.queue.push(ob);
 };
 
