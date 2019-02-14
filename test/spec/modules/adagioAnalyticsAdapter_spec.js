@@ -90,7 +90,6 @@ describe('adagio analytics adapter', () => {
 
       expect(window.top.ADAGIO.queue).length(3);
 
-      // [Object{action: 'prebid-analytics', ts: 1550153193700, data: Object{eventType: ..., args: ...}}, ...]
       let o = window.top.ADAGIO.queue.shift();
       expect(o).to.not.be.undefined;
       expect(o.action).to.equal('pb-analytics-event');
