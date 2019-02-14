@@ -34,46 +34,45 @@ const ADSRV_EVENTS = {
 
 window.top.ADAGIO = window.top.ADAGIO || {};
 window.top.ADAGIO.queue = window.top.ADAGIO.queue || [];
-window.top.ADAGIO.PBAH = window.top.ADAGIO.PBAH || {};
-window.top.ADAGIO.PBAH.q = window.top.ADAGIO.PBAH.q || [];
 
-const adagioEnqueue = function adagioEnqueue(actionName, eventName, event) {
+const adagioEnqueue = function adagioEnqueue(action, data) {
   window.top.ADAGIO.queue.push({
-    action: actionName,
+    action: action,
     ts: Date.now(),
-    data: Object.assign({}, {eventName}, {event}),
+    data: data,
   });
 }
 
-let googletag = top.googletag || {};
-googletag.cmd = googletag.cmd || [];
-googletag.cmd.push(function() {
-  const gptEvents = Object.keys(ADSRV_EVENTS.GPT).map(key => ADSRV_EVENTS.GPT[key]);
-  gptEvents.forEach(gptEventName => {
-    googletag.pubads().addEventListener(gptEventName, event => {
-      adagioEnqueue('gpt-event', gptEventName, event);
+if (top.googletag) {
+  const googletag = top.googletag;
+  googletag.cmd = googletag.cmd || [];
+  googletag.cmd.push(function() {
+    const gptEvents = Object.keys(ADSRV_EVENTS.GPT).map(key => ADSRV_EVENTS.GPT[key]);
+    gptEvents.forEach(eventName => {
+      googletag.pubads().addEventListener(eventName, args => {
+        adagioEnqueue('gpt-event', {eventName: eventName, args: args});
+      });
     });
   });
-});
+}
 
-let sas = top.sas || {};
-sas.cmd = sas.cmd || [];
-sas.cmd.push(function() {
-  const sasEvents = Object.keys(ADSRV_EVENTS.SAS).map(key => ADSRV_EVENTS.SAS[key]);
-  sasEvents.forEach(sasEventName => {
-    sas.events.on(sasEventName, function(event) {
-      adagioEnqueue('sas-event', sasEventName, event);
+if (top.sas) {
+  const sas = top.sas;
+  sas.cmd = sas.cmd || [];
+  sas.cmd.push(function() {
+    const sasEvents = Object.keys(ADSRV_EVENTS.SAS).map(key => ADSRV_EVENTS.SAS[key]);
+    sasEvents.forEach(eventName => {
+      sas.events.on(eventName, args => {
+        adagioEnqueue('sas-event', {eventName: eventName, args: args});
+      });
     });
   });
-});
+}
 
-let adagioAdapter = Object.assign(adapter({ emptyUrl, analyticsType }), {
+const adagioAdapter = Object.assign(adapter({ emptyUrl, analyticsType }), {
   track({ eventType, args }) {
     if (typeof args !== 'undefined' && events.indexOf(eventType) !== -1) {
-      window.top.ADAGIO.PBAH.q.push({
-        eventType: eventType,
-        args: args
-      });
+      adagioEnqueue('pb-analytics-event', {eventName: eventType, args: args});
     }
   }
 });
