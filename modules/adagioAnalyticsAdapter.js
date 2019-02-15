@@ -42,31 +42,27 @@ const adagioEnqueue = function adagioEnqueue(action, data) {
   window.top.ADAGIO.queue.push({ action, data, ts: Date.now() });
 }
 
-if (top.googletag) {
-  const googletag = top.googletag;
-  googletag.cmd = googletag.cmd || [];
-  googletag.cmd.push(function() {
-    const gptEvents = Object.keys(ADSRV_EVENTS.GPT).map(key => ADSRV_EVENTS.GPT[key]);
-    gptEvents.forEach(eventName => {
-      googletag.pubads().addEventListener(eventName, args => {
-        adagioEnqueue('gpt-event', { eventName, args });
-      });
+top.googletag = top.googletag || {};
+top.googletag.cmd = top.googletag.cmd || [];
+top.googletag.cmd.push(function() {
+  const gptEvents = Object.keys(ADSRV_EVENTS.GPT).map(key => ADSRV_EVENTS.GPT[key]);
+  gptEvents.forEach(eventName => {
+    top.googletag.pubads().addEventListener(eventName, args => {
+      adagioEnqueue('gpt-event', { eventName, args });
     });
   });
-}
+});
 
-if (top.sas) {
-  const sas = top.sas;
-  sas.cmd = sas.cmd || [];
-  sas.cmd.push(function() {
-    const sasEvents = Object.keys(ADSRV_EVENTS.SAS).map(key => ADSRV_EVENTS.SAS[key]);
-    sasEvents.forEach(eventName => {
-      sas.events.on(eventName, args => {
-        adagioEnqueue('sas-event', { eventName, args });
-      });
+top.sas = top.sas || {};
+top.sas.cmd = top.sas.cmd || [];
+top.sas.cmd.push(function() {
+  const sasEvents = Object.keys(ADSRV_EVENTS.SAS).map(key => ADSRV_EVENTS.SAS[key]);
+  sasEvents.forEach(eventName => {
+    top.sas.events.on(eventName, args => {
+      adagioEnqueue('sas-event', { eventName, args });
     });
   });
-}
+});
 
 const adagioAdapter = Object.assign(adapter({ emptyUrl, analyticsType }), {
   track({ eventType, args }) {
