@@ -284,6 +284,7 @@ export const spec = {
           pageviewId: pageviewId,
           adUnits: groupedAdUnits[organizationId],
           gdpr: gdprConsent,
+          prebidVersion: $$PREBID_GLOBAL$$.version,
           adapterVersion: VERSION,
           featuresVersion: FEATURES_VERSION
         },
