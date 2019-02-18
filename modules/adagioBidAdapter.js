@@ -1,9 +1,6 @@
 import find from 'core-js/library/fn/array/find';
 import * as utils from 'src/utils';
 import { registerBidder } from 'src/adapters/bidderFactory';
-import { config } from '../src/config';
-
-const prebidTimeout = parseInt(config.getConfig('bidderTimeout'), 10);
 
 const BIDDER_CODE = 'adagio';
 const VERSION = '1.1.0';
@@ -13,7 +10,7 @@ const SUPPORTED_MEDIA_TYPES = ['banner'];
 const ADAGIO_TAG_URL = '//script.4dex.io/localstore.js';
 const ADAGIO_TAG_TO_LOCALSTORE = '//script.4dex.io/adagio.js';
 const ADAGIO_LOCALSTORE_KEY = 'adagioScript';
-const LOCALSTORE_TIMEOUT = (prebidTimeout / 2) < 100 ? 100 : prebidTimeout / 2;
+const LOCALSTORE_TIMEOUT = 100;
 const script = document.createElement('script');
 
 window.top.ADAGIO = window.top.ADAGIO || {};
