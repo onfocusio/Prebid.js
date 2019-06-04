@@ -406,12 +406,12 @@ describe('adagioAdapter', () => {
       expect(spec.interpretResponse(serverResponse, bidRequest)).to.deep.equal(expectedResponse);
     });
 
-    it('Should populate ADAGIO queue with ssp-data', () => {
-      spec.interpretResponse(serverResponse, bidRequest);
-      expect(window.top.ADAGIO).ok;
-      expect(window.top.ADAGIO.queue).to.be.an('array');
-      expect(window.top.ADAGIO.queue).not.empty;
-    });
+    // it('Should populate ADAGIO queue with ssp-data', () => {
+    //   spec.interpretResponse(serverResponse, bidRequest);
+    //   expect(window.top.ADAGIO).ok;
+    //   expect(window.top.ADAGIO.queue).to.be.an('array');
+    //   expect(window.top.ADAGIO.queue).not.empty;
+    // });
   });
 
   describe('getUserSyncs', () => {

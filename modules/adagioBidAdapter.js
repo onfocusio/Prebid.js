@@ -7,10 +7,7 @@ const VERSION = '1.2.0';
 const FEATURES_VERSION = '1';
 const ENDPOINT = 'https://mp.4dex.io/prebid';
 const SUPPORTED_MEDIA_TYPES = ['banner'];
-const ADAGIO_TAG_URL = '//script.4dex.io/localstore.js';
-const ADAGIO_TAG_TO_LOCALSTORE = '//script.4dex.io/adagio.js';
-const ADAGIO_LOCALSTORE_KEY = 'adagioScript';
-const LOCALSTORE_TIMEOUT = 100;
+const ADAGIO_TAG_URL = '//script.4dex.io/adagio.js';
 const ADSRV_EVENTS = {
   GPT: {
     IMPRESSION_VIEWABLE: 'impressionViewable',
@@ -32,6 +29,7 @@ const ADSRV_EVENTS = {
     RESET: 'reset'
   }
 };
+
 const script = document.createElement('script');
 
 window.top.ADAGIO = window.top.ADAGIO || {};
@@ -39,12 +37,9 @@ window.top.ADAGIO.queue = window.top.ADAGIO.queue || [];
 window.top.ADAGIO.versions = window.top.ADAGIO.versions || {};
 window.top.ADAGIO.versions.adagioBidderAdapter = VERSION;
 
-const getAdagioTag = function getAdagioTag() {
-  const ls = window.top.localStorage.getItem('adagioScript');
-  if (ls !== null) {
-    Function(ls)(); // eslint-disable-line no-new-func
-  } else {
-    utils.logWarn('Adagio Script not found');
+const removeLegacyAdagioScript = function removeAdagioLS() {
+  if (window.top.localStorage.getItem('adagioScript')) {
+    window.top.localStorage.removeItem('adagioScript');
   }
 }
 
@@ -74,19 +69,15 @@ top.sas.cmd.push(function() {
   });
 });
 
-// First, try to load adagio-js from localStorage.
-getAdagioTag();
-
-// Then prepare localstore.js to update localStorage adagio-sj script with
-// the very last version.
-script.type = 'text/javascript';
-script.async = true;
-script.src = ADAGIO_TAG_URL;
-script.setAttribute('data-key', ADAGIO_LOCALSTORE_KEY);
-script.setAttribute('data-src', ADAGIO_TAG_TO_LOCALSTORE);
-setTimeout(function() {
+if (!document.getElementById('adagiojs')) {
+  script.type = 'text/javascript';
+  script.setAttribute('id', 'adagiojs');
+  script.async = true;
+  script.src = ADAGIO_TAG_URL;
   utils.insertElement(script);
-}, LOCALSTORE_TIMEOUT);
+}
+
+removeLegacyAdagioScript();
 
 const _features = {
   getPrintNumber: function() {
