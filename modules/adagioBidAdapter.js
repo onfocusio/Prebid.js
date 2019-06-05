@@ -234,11 +234,11 @@ function _getPageviewId() {
 /**
  * Returns all features for a specific adUnit element
  *
- * @param {Object} bidRequest
+ * @param {Object} params
  * @returns {Object} features for an element (see specs)
  */
-function _getFeatures(bidRequest) {
-  const adUnitElementId = bidRequest.params.adUnitElementId;
+function _getFeatures(params) {
+  const adUnitElementId = params.adUnitElementId;
   const element = document.getElementById(adUnitElementId);
   let features = {};
 
@@ -316,7 +316,7 @@ export const spec = {
     const pageviewId = _getPageviewId();
     const gdprConsent = _getGdprConsent(bidderRequest);
     const adUnits = utils._map(validBidRequests, (bidRequest) => {
-      bidRequest.features = _getFeatures(bidRequest);
+      bidRequest.features = _getFeatures(bidRequest.params);
       return bidRequest;
     });
 
@@ -397,6 +397,28 @@ export const spec = {
       }
     })
     return syncs;
+  },
+
+  transformBidParams: function(params, isOpenRtb) {
+    const pageviewId = _getPageviewId();
+    params = utils.convertTypes({
+      'organizationId': 'string',
+      'site': 'string',
+      'placement': 'string',
+      'adUnitElementId': 'string',
+      'environment': 'string',
+      'category': 'string',
+      'subcategory': 'string'
+    }, params);
+
+    if (isOpenRtb) {
+      params.pageviewId = pageviewId;
+      params.adapterVersion = VERSION;
+      params.featuresVersion = FEATURES_VERSION;
+      params.features = _getFeatures(params);
+    }
+
+    return params;
   }
 }
 
