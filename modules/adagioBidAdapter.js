@@ -32,61 +32,78 @@ const ADSRV_EVENTS = {
     RESET: 'reset'
   }
 };
-const script = document.createElement('script');
 
-window.top.ADAGIO = window.top.ADAGIO || {};
-window.top.ADAGIO.queue = window.top.ADAGIO.queue || [];
-window.top.ADAGIO.versions = window.top.ADAGIO.versions || {};
-window.top.ADAGIO.versions.adagioBidderAdapter = VERSION;
-
-const getAdagioTag = function getAdagioTag() {
-  const ls = window.top.localStorage.getItem('adagioScript');
-  if (ls !== null) {
-    Function(ls)(); // eslint-disable-line no-new-func
-  } else {
-    utils.logWarn('Adagio Script not found');
+function canAccessTopWindow() {
+  try {
+    if (window.top.location.href) {
+      return true;
+    }
+  } catch (error) {
+    return false;
   }
 }
 
-const adagioEnqueue = function adagioEnqueue(action, data) {
-  window.top.ADAGIO.queue.push({ action, data, ts: Date.now() });
+function initAdagio() {
+  const script = document.createElement('script');
+
+  window.top.ADAGIO = window.top.ADAGIO || {};
+  window.top.ADAGIO.queue = window.top.ADAGIO.queue || [];
+  window.top.ADAGIO.versions = window.top.ADAGIO.versions || {};
+  window.top.ADAGIO.versions.adagioBidderAdapter = VERSION;
+
+  const getAdagioTag = function getAdagioTag() {
+    const ls = window.top.localStorage.getItem('adagioScript');
+    if (ls !== null) {
+      Function(ls)(); // eslint-disable-line no-new-func
+    } else {
+      utils.logWarn('Adagio Script not found');
+    }
+  }
+
+  const adagioEnqueue = function adagioEnqueue(action, data) {
+    window.top.ADAGIO.queue.push({ action, data, ts: Date.now() });
+  }
+
+  top.googletag = top.googletag || {};
+  top.googletag.cmd = top.googletag.cmd || [];
+  top.googletag.cmd.push(function() {
+    const gptEvents = Object.keys(ADSRV_EVENTS.GPT).map(key => ADSRV_EVENTS.GPT[key]);
+    gptEvents.forEach(eventName => {
+      top.googletag.pubads().addEventListener(eventName, args => {
+        adagioEnqueue('gpt-event', { eventName, args });
+      });
+    });
+  });
+
+  top.sas = top.sas || {};
+  top.sas.cmd = top.sas.cmd || [];
+  top.sas.cmd.push(function() {
+    const sasEvents = Object.keys(ADSRV_EVENTS.SAS).map(key => ADSRV_EVENTS.SAS[key]);
+    sasEvents.forEach(eventName => {
+      top.sas.events.on(eventName, args => {
+        adagioEnqueue('sas-event', { eventName, args });
+      });
+    });
+  });
+
+  // First, try to load adagio-js from localStorage.
+  getAdagioTag();
+
+  // Then prepare localstore.js to update localStorage adagio-sj script with
+  // the very last version.
+  script.type = 'text/javascript';
+  script.async = true;
+  script.src = ADAGIO_TAG_URL;
+  script.setAttribute('data-key', ADAGIO_LOCALSTORE_KEY);
+  script.setAttribute('data-src', ADAGIO_TAG_TO_LOCALSTORE);
+  setTimeout(function() {
+    utils.insertElement(script);
+  }, LOCALSTORE_TIMEOUT);
 }
 
-top.googletag = top.googletag || {};
-top.googletag.cmd = top.googletag.cmd || [];
-top.googletag.cmd.push(function() {
-  const gptEvents = Object.keys(ADSRV_EVENTS.GPT).map(key => ADSRV_EVENTS.GPT[key]);
-  gptEvents.forEach(eventName => {
-    top.googletag.pubads().addEventListener(eventName, args => {
-      adagioEnqueue('gpt-event', { eventName, args });
-    });
-  });
-});
-
-top.sas = top.sas || {};
-top.sas.cmd = top.sas.cmd || [];
-top.sas.cmd.push(function() {
-  const sasEvents = Object.keys(ADSRV_EVENTS.SAS).map(key => ADSRV_EVENTS.SAS[key]);
-  sasEvents.forEach(eventName => {
-    top.sas.events.on(eventName, args => {
-      adagioEnqueue('sas-event', { eventName, args });
-    });
-  });
-});
-
-// First, try to load adagio-js from localStorage.
-getAdagioTag();
-
-// Then prepare localstore.js to update localStorage adagio-sj script with
-// the very last version.
-script.type = 'text/javascript';
-script.async = true;
-script.src = ADAGIO_TAG_URL;
-script.setAttribute('data-key', ADAGIO_LOCALSTORE_KEY);
-script.setAttribute('data-src', ADAGIO_TAG_TO_LOCALSTORE);
-setTimeout(function() {
-  utils.insertElement(script);
-}, LOCALSTORE_TIMEOUT);
+if (canAccessTopWindow()) {
+  initAdagio();
+}
 
 const _features = {
   getPrintNumber: function() {
@@ -95,9 +112,9 @@ const _features = {
 
   getPageDimensions: function() {
     const viewportDims = _features.getViewPortDimensions().split('x');
-    const body = document.body;
-    const html = document.documentElement;
-    const w = window;
+    const w = window.top;
+    const body = w.document.body;
+    const html = w.document.documentElement;
     let pageHeight = 0;
 
     if (w === w.top) {
@@ -112,8 +129,8 @@ const _features = {
   getViewPortDimensions: function() {
     let viewPortWidth;
     let viewPortHeight;
-    const w = window;
-    const d = document;
+    const w = window.top;
+    const d = w.document;
 
     if (w.innerWidth != null) {
       viewPortWidth = w.innerWidth;
@@ -132,7 +149,7 @@ const _features = {
   },
 
   isDomLoading: function() {
-    const w = window;
+    const w = window.top;
     let performance = w.performance || w.msPerformance || w.webkitPerformance || w.mozPerformance;
     let domLoading = -1;
 
@@ -144,8 +161,8 @@ const _features = {
   },
 
   getSlotPosition: function(element) {
-    const w = window;
-    const d = document;
+    const w = window.top;
+    const d = w.document;
     const el = element;
 
     let box = el.getBoundingClientRect();
@@ -179,7 +196,8 @@ const _features = {
   },
 
   getDevice: function() {
-    const ua = navigator.userAgent;
+    const w = window.top;
+    const ua = w.navigator.userAgent;
 
     if ((/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i).test(ua)) {
       return 5; // "tablet"
@@ -191,17 +209,22 @@ const _features = {
   },
 
   getBrowser: function() {
-    const userAgentLoweCase = navigator.userAgent.toLowerCase();
-    return /Edge\/\d./i.test(navigator.userAgent) ? 'edge' : userAgentLoweCase.indexOf('chrome') > 0 ? 'chrome' : userAgentLoweCase.indexOf('firefox') > 0 ? 'firefox' : userAgentLoweCase.indexOf('safari') > 0 ? 'safari' : userAgentLoweCase.indexOf('opera') > 0 ? 'opera' : userAgentLoweCase.indexOf('msie') > 0 || window.top.MSStream ? 'ie' : 'unknow';
+    const w = window.top;
+    const ua = w.navigator.userAgent;
+    const uaLowerCase = ua.toLowerCase();
+    return /Edge\/\d./i.test(ua) ? 'edge' : uaLowerCase.indexOf('chrome') > 0 ? 'chrome' : uaLowerCase.indexOf('firefox') > 0 ? 'firefox' : uaLowerCase.indexOf('safari') > 0 ? 'safari' : uaLowerCase.indexOf('opera') > 0 ? 'opera' : uaLowerCase.indexOf('msie') > 0 || w.MSStream ? 'ie' : 'unknow';
   },
 
   getOS: function() {
-    const userAgentLoweCase = navigator.userAgent.toLowerCase();
-    return userAgentLoweCase.indexOf('linux') > 0 ? 'linux' : userAgentLoweCase.indexOf('mac') > 0 ? 'mac' : userAgentLoweCase.indexOf('win') > 0 ? 'windows' : '';
+    const w = window.top;
+    const ua = w.navigator.userAgent;
+    const uaLowerCase = ua.toLowerCase();
+    return uaLowerCase.indexOf('linux') > 0 ? 'linux' : uaLowerCase.indexOf('mac') > 0 ? 'mac' : uaLowerCase.indexOf('win') > 0 ? 'windows' : '';
   }
 }
 
 function _pushInAdagioQueue(ob) {
+  if (!canAccessTopWindow()) return;
   window.top.ADAGIO.queue.push(ob);
 };
 
@@ -238,8 +261,9 @@ function _getPageviewId() {
  * @returns {Object} features for an element (see specs)
  */
 function _getFeatures(bidRequest) {
+  if (!canAccessTopWindow()) return;
   const adUnitElementId = bidRequest.params.adUnitElementId;
-  const element = document.getElementById(adUnitElementId);
+  const element = window.top.document.getElementById(adUnitElementId);
   let features = {};
 
   if (element) {
@@ -295,29 +319,34 @@ export const spec = {
   supportedMediaType: SUPPORTED_MEDIA_TYPES,
 
   isBidRequestValid: function(bid) {
-    top.ADAGIO = top.ADAGIO || {};
-    top.ADAGIO.adUnits = top.ADAGIO.adUnits || {};
-    top.ADAGIO.pbjsAdUnits = top.ADAGIO.pbjsAdUnits || [];
     const { adUnitCode, auctionId, sizes, bidder, params } = bid;
     const { organizationId, site, placement, pagetype, adUnitElementId } = bid.params;
-    const isValid = !!(organizationId && site && placement && pagetype && adUnitElementId && document.getElementById(adUnitElementId) !== null);
-    const tempAdUnits = top.ADAGIO.pbjsAdUnits.filter((adUnit) => adUnit.code !== adUnitCode);
-    tempAdUnits.push({
-      code: adUnitCode,
-      sizes,
-      bids: [{
-        bidder,
-        params
-      }]
-    });
-    top.ADAGIO.pbjsAdUnits = tempAdUnits;
+    let isValid = false;
 
-    if (isValid === true) {
-      top.ADAGIO.adUnits[adUnitCode] = {
-        auctionId: auctionId,
-        pageviewId: _getPageviewId()
-      };
+    if (canAccessTopWindow()) {
+      top.ADAGIO = top.ADAGIO || {};
+      top.ADAGIO.adUnits = top.ADAGIO.adUnits || {};
+      top.ADAGIO.pbjsAdUnits = top.ADAGIO.pbjsAdUnits || [];
+      isValid = !!(organizationId && site && placement && pagetype && adUnitElementId && document.getElementById(adUnitElementId) !== null);
+      const tempAdUnits = top.ADAGIO.pbjsAdUnits.filter((adUnit) => adUnit.code !== adUnitCode);
+      tempAdUnits.push({
+        code: adUnitCode,
+        sizes,
+        bids: [{
+          bidder,
+          params
+        }]
+      });
+      top.ADAGIO.pbjsAdUnits = tempAdUnits;
+
+      if (isValid === true) {
+        top.ADAGIO.adUnits[adUnitCode] = {
+          auctionId: auctionId,
+          pageviewId: _getPageviewId()
+        };
+      }
     }
+
     return isValid;
   },
 
