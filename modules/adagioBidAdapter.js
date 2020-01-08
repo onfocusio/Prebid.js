@@ -25,6 +25,9 @@ pV6EP3MTLosuUEpLaQIDAQAB
 
 export function adagioScriptFromLocalStorageCb(ls) {
   try {
+    // const w = utils.getWindowSelf();
+    // const ls = w.localStorage.getItem(ADAGIO_LOCALSTORAGE_KEY);
+
     if (!ls) {
       utils.logWarn('Adagio Script not found');
       return;
@@ -73,7 +76,7 @@ function canAccessTopWindow() {
 }
 
 function initAdagio() {
-  const w = utils.getWindowTop();
+  const w = utils.getWindowSelf();
 
   w.ADAGIO = w.ADAGIO || {};
   w.ADAGIO.queue = w.ADAGIO.queue || [];
@@ -85,9 +88,9 @@ function initAdagio() {
   loadExternalScript(ADAGIO_TAG_URL, BIDDER_CODE)
 }
 
-if (canAccessTopWindow()) {
-  initAdagio();
-}
+// if (canAccessTopWindow()) {
+initAdagio();
+// }
 
 const _features = {
   getPrintNumber: function (adUnitCode) {
@@ -95,7 +98,9 @@ const _features = {
     return adagioAdUnit.printNumber || 1;
   },
 
-  getPageDimensions: function () {
+  getPageDimensions: function() {
+    if (!canAccessTopWindow()) return '';
+
     const viewportDims = _features.getViewPortDimensions().split('x');
     const w = utils.getWindowTop();
     const body = w.document.body;
@@ -108,7 +113,9 @@ const _features = {
     return viewportDims[0] + 'x' + pageHeight;
   },
 
-  getViewPortDimensions: function () {
+  getViewPortDimensions: function() {
+    if (!canAccessTopWindow()) return '';
+
     let viewPortWidth;
     let viewPortHeight;
     const w = utils.getWindowTop();
@@ -125,8 +132,8 @@ const _features = {
     return viewPortWidth + 'x' + viewPortHeight;
   },
 
-  isDomLoading: function () {
-    const w = utils.getWindowTop();
+  isDomLoading: function() {
+    const w = utils.getWindowSelf();
     let performance = w.performance || w.msPerformance || w.webkitPerformance || w.mozPerformance;
     let domLoading = -1;
 
@@ -137,8 +144,8 @@ const _features = {
     return domLoading;
   },
 
-  getSlotPosition: function (element) {
-    if (!element) return '';
+  getSlotPosition: function(element) {
+    if (!canAccessTopWindow() || !element) return '';
 
     const w = utils.getWindowTop();
     const d = w.document;
@@ -175,9 +182,10 @@ const _features = {
     return Math.floor(new Date().getTime() / 1000) - new Date().getTimezoneOffset() * 60;
   },
 
-  getDevice: function () {
-    if (!canAccessTopWindow()) return false;
-    const w = utils.getWindowTop();
+  getDevice: function() {
+    // if (!canAccessTopWindow()) return '';
+    // const w = utils.getWindowTop();
+    const w = utils.getWindowSelf();
     const ua = w.navigator.userAgent;
 
     if ((/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i).test(ua)) {
@@ -189,15 +197,17 @@ const _features = {
     return 2; // personal computers
   },
 
-  getBrowser: function () {
-    const w = utils.getWindowTop();
+  getBrowser: function() {
+    // if (!canAccessTopWindow()) return '';
+    const w = utils.getWindowSelf();
     const ua = w.navigator.userAgent;
     const uaLowerCase = ua.toLowerCase();
     return /Edge\/\d./i.test(ua) ? 'edge' : uaLowerCase.indexOf('chrome') > 0 ? 'chrome' : uaLowerCase.indexOf('firefox') > 0 ? 'firefox' : uaLowerCase.indexOf('safari') > 0 ? 'safari' : uaLowerCase.indexOf('opera') > 0 ? 'opera' : uaLowerCase.indexOf('msie') > 0 || w.MSStream ? 'ie' : 'unknow';
   },
 
-  getOS: function () {
-    const w = window.top;
+  getOS: function() {
+    // if (!canAccessTopWindow()) return '';
+    const w = utils.getWindowSelf();
     const ua = w.navigator.userAgent;
     const uaLowerCase = ua.toLowerCase();
     return uaLowerCase.indexOf('linux') > 0 ? 'linux' : uaLowerCase.indexOf('mac') > 0 ? 'mac' : uaLowerCase.indexOf('win') > 0 ? 'windows' : '';
@@ -206,14 +216,14 @@ const _features = {
 
 function _pushInAdagioQueue(ob) {
   try {
-    if (!canAccessTopWindow()) return;
-    const w = utils.getWindowTop();
+    // if (!canAccessTopWindow()) return;
+    const w = utils.getWindowSelf();
     w.ADAGIO.queue.push(ob);
   } catch (e) {}
 };
 
 function _getOrAddAdagioAdUnit(adUnitCode) {
-  const w = utils.getWindowTop();
+  const w = utils.getWindowSelf();
   if (w.ADAGIO.adUnits[adUnitCode]) {
     return w.ADAGIO.adUnits[adUnitCode]
   }
@@ -222,7 +232,7 @@ function _getOrAddAdagioAdUnit(adUnitCode) {
 
 function _computePrintNumber(adUnitCode) {
   let printNumber = 1;
-  const w = utils.getWindowTop();
+  const w = utils.getWindowSelf();
   if (
     w.ADAGIO &&
     w.ADAGIO.adUnits && w.ADAGIO.adUnits[adUnitCode] &&
@@ -247,7 +257,17 @@ function _getDevice() {
 };
 
 function _getSite() {
-  const w = utils.getWindowTop();
+  // let domain = '';
+  // let page = '';
+  // let referrer = '';
+
+  // if (canAccessTopWindow()) {
+  const w = utils.getWindowSelf();
+  // domain = w.location.hostname;
+  // page = w.location.href;
+  // referrer = w.document.referrer || '';
+  // }
+
   return {
     domain: w.location.hostname,
     page: w.location.href,
@@ -256,8 +276,8 @@ function _getSite() {
 };
 
 function _getPageviewId() {
-  if (!canAccessTopWindow()) return false;
-  const w = utils.getWindowTop();
+  // if (!canAccessTopWindow()) return false;
+  const w = utils.getWindowSelf();
   w.ADAGIO.pageviewId = w.ADAGIO.pageviewId || utils.generateUUID();
   return w.ADAGIO.pageviewId;
 };
@@ -281,8 +301,8 @@ function _getElementFromTopWindow(element, currentWindow) {
  * @returns {Object} features for an element (see specs)
  */
 function _getFeatures(bidRequest) {
-  if (!canAccessTopWindow()) return;
-  const w = utils.getWindowTop();
+  // if (!canAccessTopWindow()) return;
+  const w = utils.getWindowSelf();
   const adUnitElementId = bidRequest.params.adUnitElementId;
   const adUnitCode = bidRequest.adUnitCode;
 
@@ -366,32 +386,32 @@ export const spec = {
     let isValid = false;
 
     try {
-      if (canAccessTopWindow()) {
-        const w = utils.getWindowTop();
-        w.ADAGIO = w.ADAGIO || {};
-        w.ADAGIO.adUnits = w.ADAGIO.adUnits || {};
-        w.ADAGIO.pbjsAdUnits = w.ADAGIO.pbjsAdUnits || [];
-        isValid = !!(organizationId && site && placement && adUnitElementId);
-        const tempAdUnits = w.ADAGIO.pbjsAdUnits.filter((adUnit) => adUnit.code !== adUnitCode);
-        tempAdUnits.push({
-          code: adUnitCode,
-          sizes: (mediaTypes && mediaTypes.banner && Array.isArray(mediaTypes.banner.sizes)) ? mediaTypes.banner.sizes : sizes,
-          bids: [{
-            bidder,
-            params
-          }]
-        });
-        w.ADAGIO.pbjsAdUnits = tempAdUnits;
+      // if (canAccessTopWindow()) {
+      const w = utils.getWindowSelf();
+      w.ADAGIO = w.ADAGIO || {};
+      w.ADAGIO.adUnits = w.ADAGIO.adUnits || {};
+      w.ADAGIO.pbjsAdUnits = w.ADAGIO.pbjsAdUnits || [];
+      isValid = !!(organizationId && site && placement && adUnitElementId);
+      const tempAdUnits = w.ADAGIO.pbjsAdUnits.filter((adUnit) => adUnit.code !== adUnitCode);
+      tempAdUnits.push({
+        code: adUnitCode,
+        sizes: (mediaTypes && mediaTypes.banner && Array.isArray(mediaTypes.banner.sizes)) ? mediaTypes.banner.sizes : sizes,
+        bids: [{
+          bidder,
+          params
+        }]
+      });
+      w.ADAGIO.pbjsAdUnits = tempAdUnits;
 
-        if (isValid === true) {
-          let printNumber = _computePrintNumber(adUnitCode);
-          w.ADAGIO.adUnits[adUnitCode] = {
-            auctionId: auctionId,
-            pageviewId: _getPageviewId(),
-            printNumber
-          };
-        }
+      if (isValid === true) {
+        let printNumber = _computePrintNumber(adUnitCode);
+        w.ADAGIO.adUnits[adUnitCode] = {
+          auctionId: auctionId,
+          pageviewId: _getPageviewId(),
+          printNumber
+        };
       }
+      // }
     } catch (e) {
       return isValid;
     }

@@ -3,7 +3,7 @@ import { adagioScriptFromLocalStorageCb, spec } from 'modules/adagioBidAdapter.j
 import { newBidder } from 'src/adapters/bidderFactory.js';
 import * as utils from 'src/utils.js';
 
-describe('adagioAdapter', () => {
+describe.skip('adagioAdapter', () => {
   let utilsMock;
   const adapter = newBidder(spec);
   const ENDPOINT = 'https://mp.4dex.io/prebid';
