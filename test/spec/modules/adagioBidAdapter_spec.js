@@ -3,7 +3,7 @@ import { adagioScriptFromLocalStorageCb, spec } from 'modules/adagioBidAdapter.j
 import { newBidder } from 'src/adapters/bidderFactory.js';
 import * as utils from 'src/utils.js';
 
-describe.skip('adagioAdapter', () => {
+describe.only('adagioAdapter', () => {
   let utilsMock;
   const adapter = newBidder(spec);
   const ENDPOINT = 'https://mp.4dex.io/prebid';
@@ -90,21 +90,21 @@ describe.skip('adagioAdapter', () => {
 
     it('should return true when required params found', () => {
       expect(spec.isBidRequestValid(bid)).to.equal(true);
-      expect(window.top.ADAGIO.adUnits['adunit-code'].printNumber).to.equal(1);
+      expect(window.self.ADAGIO.adUnits['adunit-code'].printNumber).to.equal(1);
     })
 
     it('should compute a printNumber for the new bid request on same adUnitCode and same pageviewId', () => {
       spec.isBidRequestValid(bid);
-      expect(window.top.ADAGIO.adUnits).ok;
-      expect(window.top.ADAGIO.adUnits['adunit-code']).ok;
-      expect(window.top.ADAGIO.adUnits['adunit-code'].printNumber).to.equal(2);
+      expect(window.self.ADAGIO.adUnits).ok;
+      expect(window.self.ADAGIO.adUnits['adunit-code']).ok;
+      expect(window.self.ADAGIO.adUnits['adunit-code'].printNumber).to.equal(2);
 
       spec.isBidRequestValid(bid);
-      expect(window.top.ADAGIO.adUnits['adunit-code'].printNumber).to.equal(3);
+      expect(window.self.ADAGIO.adUnits['adunit-code'].printNumber).to.equal(3);
 
-      window.top.ADAGIO.pageviewId = 123;
+      window.self.ADAGIO.pageviewId = 123;
       spec.isBidRequestValid(bid);
-      expect(window.top.ADAGIO.adUnits['adunit-code'].printNumber).to.equal(1);
+      expect(window.self.ADAGIO.adUnits['adunit-code'].printNumber).to.equal(1);
     });
 
     it('should return false when organization params is not passed', () => {
@@ -139,10 +139,10 @@ describe.skip('adagioAdapter', () => {
     it('should expose ADAGIO.pbjsAdUnits in window', () => {
       spec.isBidRequestValid(bidWithMediaTypes);
       spec.isBidRequestValid(bid);
-      expect(window.top.ADAGIO.pbjsAdUnits).ok;
-      expect(window.top.ADAGIO.pbjsAdUnits).to.have.lengthOf(2);
-      const adUnitWithMediaTypeSizes = window.top.ADAGIO.pbjsAdUnits.filter((aU) => aU.code === 'adunit-code-2')[0];
-      const adUnitWithSizes = window.top.ADAGIO.pbjsAdUnits.filter((aU) => aU.code === 'adunit-code')[0];
+      expect(window.self.ADAGIO.pbjsAdUnits).ok;
+      expect(window.self.ADAGIO.pbjsAdUnits).to.have.lengthOf(2);
+      const adUnitWithMediaTypeSizes = window.self.ADAGIO.pbjsAdUnits.filter((aU) => aU.code === 'adunit-code-2')[0];
+      const adUnitWithSizes = window.self.ADAGIO.pbjsAdUnits.filter((aU) => aU.code === 'adunit-code')[0];
       expect(adUnitWithMediaTypeSizes.sizes).to.eql([[300, 250]]);
       expect(adUnitWithSizes.sizes).to.eql([[300, 250], [300, 600]]);
     });
@@ -193,22 +193,28 @@ describe.skip('adagioAdapter', () => {
       display: 'none'
     };
 
+    const $sf = {
+      ext: {
+        geom: function() {}
+      }
+    }
+
     const stubs = {
-      topGetElementById: undefined,
+      selfGetElementById: undefined,
       topGetComputedStyle: undefined
     }
 
-    top.ADAGIO = top.ADAGIO || {};
-    top.ADAGIO.adUnits = top.ADAGIO.adUnits || {};
-    top.ADAGIO.pbjsAdUnits = top.ADAGIO.pbjsAdUnits || [];
+    self.ADAGIO = self.ADAGIO || {};
+    self.ADAGIO.adUnits = self.ADAGIO.adUnits || {};
+    self.ADAGIO.pbjsAdUnits = self.ADAGIO.pbjsAdUnits || [];
 
     beforeEach(function () {
-      stubs.topGetElementById = sandbox.stub(top.document, 'getElementById');
+      stubs.selfGetElementById = sandbox.stub(window.document, 'getElementById');
       stubs.topGetComputedStyle = sandbox.stub(top, 'getComputedStyle');
 
-      stubs.topGetElementById.withArgs('banner-atf-123').returns(banner300x250);
-      stubs.topGetElementById.withArgs('banner-atf-456').returns(banner300x600);
-      stubs.topGetElementById.withArgs('does-not-exist').returns(null);
+      stubs.selfGetElementById.withArgs('banner-atf-123').returns(banner300x250);
+      stubs.selfGetElementById.withArgs('banner-atf-456').returns(banner300x600);
+      stubs.selfGetElementById.withArgs('does-not-exist').returns(null);
       stubs.topGetComputedStyle.returns(computedStyleBlock);
     });
 
@@ -387,10 +393,10 @@ describe.skip('adagioAdapter', () => {
     });
 
     it('outerAdUnitElementId must be added when PostBid param has been set', () => {
-      top.ADAGIO = top.ADAGIO || {};
-      top.ADAGIO.pbjsAdUnits = [];
+      self.ADAGIO = self.ADAGIO || {};
+      self.ADAGIO.pbjsAdUnits = [];
 
-      top.ADAGIO.pbjsAdUnits.push({
+      self.ADAGIO.pbjsAdUnits.push({
         code: bidRequestsWithPostBid[0].adUnitCode,
         sizes: bidRequestsWithPostBid[0].sizes,
         bids: [{
@@ -406,8 +412,8 @@ describe.skip('adagioAdapter', () => {
     });
 
     it('generates a pageviewId if missing', () => {
-      window.top.ADAGIO = window.top.ADAGIO || {};
-      delete window.top.ADAGIO.pageviewId;
+      window.self.ADAGIO = window.self.ADAGIO || {};
+      delete window.self.ADAGIO.pageviewId;
 
       const requests = spec.buildRequests(bidRequests, bidderRequest);
       expect(requests).to.have.lengthOf(2);
@@ -417,8 +423,8 @@ describe.skip('adagioAdapter', () => {
     });
 
     it('uses an existing pageviewId if present', () => {
-      window.top.ADAGIO = window.top.ADAGIO || {};
-      window.top.ADAGIO.pageviewId = 'abc';
+      window.self.ADAGIO = window.self.ADAGIO || {};
+      window.self.ADAGIO.pageviewId = 'abc';
 
       const requests = spec.buildRequests(bidRequests, bidderRequest);
       expect(requests).to.have.lengthOf(2);
@@ -428,9 +434,9 @@ describe.skip('adagioAdapter', () => {
     });
 
     it('should send the printNumber in features object', () => {
-      window.top.ADAGIO = window.top.ADAGIO || {};
-      window.top.ADAGIO.pageviewId = 'abc';
-      window.top.ADAGIO.adUnits['adunit-code1'] = {
+      window.self.ADAGIO = window.self.ADAGIO || {};
+      window.self.ADAGIO.pageviewId = 'abc';
+      window.self.ADAGIO.adUnits['adunit-code1'] = {
         pageviewId: 'abc',
         printNumber: 2
       };
@@ -527,17 +533,53 @@ describe.skip('adagioAdapter', () => {
     });
 
     it('should expose version in window', () => {
-      expect(window.top.ADAGIO).ok;
-      expect(window.top.ADAGIO.versions).ok;
-      expect(window.top.ADAGIO.versions.adagioBidderAdapter).to.eq(VERSION);
+      expect(window.self.ADAGIO).ok;
+      expect(window.self.ADAGIO.versions).ok;
+      expect(window.self.ADAGIO.versions.adagioBidderAdapter).to.eq(VERSION);
     });
 
-    it('should returns an empty array if the bidder cannot access to window top (based on refererInfo.reachedTop)', () => {
+    it('should returns an array if the bidder cannot access to window top (based on refererInfo.reachedTop)', () => {
       const requests = spec.buildRequests(bidRequests, {
         ...bidderRequest,
         refererInfo: { reachedTop: false }
       });
-      expect(requests).to.be.empty;
+      expect(requests).to.exist;
+    });
+
+    it('Should returns empty `page_dimensions` features if no body', () => {
+      // This appens when Prebid is executed before DOM has been loaded.
+      sandbox.stub(top.document, 'querySelector').withArgs('body').returns(false);
+      let requests = spec.buildRequests([bidRequests[0]], bidderRequest);
+      const request = requests[0];
+      expect(request.data.adUnits[0].features).to.exist;
+      expect(request.data.adUnits[0].features.page_dimensions).to.deep.equal('');
+    });
+
+    it('Should returns empty specifics features if Prebid is in Unfriendly Iframe', () => {
+      sandbox.stub(utils, 'getWindowTop').throws();
+      let requests = spec.buildRequests(bidRequests, bidderRequest);
+      const request = requests[0];
+      expect(request.data.adUnits[0].features).to.exist;
+      expect(request.data.adUnits[0].features.viewport_dimensions).to.deep.equal('');
+      expect(request.data.adUnits[0].features.page_dimensions).to.deep.equal('');
+      expect(request.data.adUnits[0].features.adunit_position).to.deep.equal('');
+    });
+
+    it('Should returns computed specifics features if Prebid is in SafeFrame', () => {
+      sandbox.stub(utils, 'getWindowTop').throws();
+      window.$sf = $sf;
+      stubs.$sfGeom = sandbox.stub(window.$sf.ext, 'geom');
+      stubs.$sfGeom.returns({
+        win: {w: 300, h: 400},
+        self: {t: 20, l: 100}
+      });
+
+      let requests = spec.buildRequests(bidRequests, bidderRequest);
+      const request = requests[0];
+      expect(request.data.adUnits[0].features).to.exist;
+      expect(request.data.adUnits[0].features.viewport_dimensions).to.deep.equal('300x400');
+      expect(request.data.adUnits[0].features.page_dimensions).to.deep.equal('');
+      expect(request.data.adUnits[0].features.adunit_position).to.deep.equal('20x100');
     });
 
     it('Should add the schain if available at bidder level', () => {
@@ -683,17 +725,17 @@ describe.skip('adagioAdapter', () => {
 
     it('Should populate ADAGIO queue with ssp-data', () => {
       spec.interpretResponse(serverResponse, bidRequest);
-      expect(window.top.ADAGIO).ok;
-      expect(window.top.ADAGIO.queue).to.be.an('array');
+      expect(window.self.ADAGIO).ok;
+      expect(window.self.ADAGIO.queue).to.be.an('array');
     });
 
-    it('Should not populate ADAGIO queue with ssp-data if not in top window', () => {
-      utils.getWindowTop().ADAGIO.queue = [];
+    it.skip('Should populate ADAGIO queue with ssp-data if not in top window', () => {
+      utils.getWindowSelf().ADAGIO.queue = [];
       sandbox.stub(utils, 'getWindowTop').throws();
       spec.interpretResponse(serverResponse, bidRequest);
-      expect(window.top.ADAGIO).ok;
-      expect(window.top.ADAGIO.queue).to.be.an('array');
-      expect(window.top.ADAGIO.queue).empty;
+      expect(window.self.ADAGIO).ok;
+      expect(window.self.ADAGIO.queue).to.be.an('array');
+      expect(window.self.ADAGIO.queue).empty;
     });
 
     it('should return an empty response even if an exception is ', () => {

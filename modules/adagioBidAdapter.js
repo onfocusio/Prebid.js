@@ -75,6 +75,11 @@ function canAccessTopWindow() {
   }
 }
 
+export function isSafeFrameWindow() {
+  const w = utils.getWindowSelf();
+  return !!(w.$sf && w.$sf.ext);
+}
+
 function initAdagio() {
   const w = utils.getWindowSelf();
 
@@ -99,11 +104,13 @@ const _features = {
   },
 
   getPageDimensions: function() {
+    if (isSafeFrameWindow()) return '';
+
     if (!canAccessTopWindow()) return '';
 
     const viewportDims = _features.getViewPortDimensions().split('x');
     const w = utils.getWindowTop();
-    const body = w.document.body;
+    const body = w.document.querySelector('body');
     if (!body) {
       return ''
     }
@@ -114,22 +121,36 @@ const _features = {
   },
 
   getViewPortDimensions: function() {
-    if (!canAccessTopWindow()) return '';
+    const viewportDims = {
+      w: 0,
+      h: 0
+    };
 
-    let viewPortWidth;
-    let viewPortHeight;
-    const w = utils.getWindowTop();
-    const d = w.document;
+    let w;
+    let d;
+    let sfGeom;
 
-    if (w.innerWidth) {
-      viewPortWidth = w.innerWidth;
-      viewPortHeight = w.innerHeight;
+    if (isSafeFrameWindow()) {
+      w = utils.getWindowSelf();
+      sfGeom = w.$sf.ext.geom().win;
+      viewportDims.w = Math.round(sfGeom.w);
+      viewportDims.h = Math.round(sfGeom.h);
+    } else if (!canAccessTopWindow()) {
+      return '';
     } else {
-      viewPortWidth = d.getElementsByTagName('body')[0].clientWidth;
-      viewPortHeight = d.getElementsByTagName('body')[0].clientHeight;
+      w = utils.getWindowTop();
+      d = w.document;
+
+      if (w.innerWidth) {
+        viewportDims.w = w.innerWidth;
+        viewportDims.h = w.innerHeight;
+      } else {
+        viewportDims.w = d.getElementsByTagName('body')[0].clientWidth;
+        viewportDims.h = d.getElementsByTagName('body')[0].clientHeight;
+      }
     }
 
-    return viewPortWidth + 'x' + viewPortHeight;
+    return `${viewportDims.w}x${viewportDims.h}`;
   },
 
   isDomLoading: function() {
@@ -145,37 +166,50 @@ const _features = {
   },
 
   getSlotPosition: function(element) {
-    if (!canAccessTopWindow() || !element) return '';
-
-    const w = utils.getWindowTop();
-    const d = w.document;
-    const el = element;
-
-    let box = el.getBoundingClientRect();
-    const docEl = d.documentElement;
-    const body = d.body;
-    const clientTop = d.clientTop || body.clientTop || 0;
-    const clientLeft = d.clientLeft || body.clientLeft || 0;
-    const scrollTop = w.pageYOffset || docEl.scrollTop || body.scrollTop;
-    const scrollLeft = w.pageXOffset || docEl.scrollLeft || body.scrollLeft;
-
-    const elComputedStyle = w.getComputedStyle(el, null);
-    const elComputedDisplay = elComputedStyle.display || 'block';
-    const mustDisplayElement = elComputedDisplay === 'none';
-
-    if (mustDisplayElement) {
-      el.style = el.style || {};
-      el.style.display = 'block';
-      box = el.getBoundingClientRect();
-      el.style.display = elComputedDisplay;
-    }
-
     const position = {
-      x: Math.round(box.left + scrollLeft - clientLeft),
-      y: Math.round(box.top + scrollTop - clientTop)
+      x: 0,
+      y: 0
     };
 
-    return position.x + 'x' + position.y;
+    let w;
+    let d;
+
+    if (isSafeFrameWindow()) {
+      w = utils.getWindowSelf();
+      const sfGeom = w.$sf.ext.geom().self;
+      position.x = Math.round(sfGeom.t);
+      position.y = Math.round(sfGeom.l);
+    } else if (!canAccessTopWindow() || !element) {
+      return '';
+    } else {
+      w = utils.getWindowTop();
+      d = w.document;
+      const el = element;
+
+      let box = el.getBoundingClientRect();
+      const docEl = d.documentElement;
+      const body = d.body;
+      const clientTop = d.clientTop || body.clientTop || 0;
+      const clientLeft = d.clientLeft || body.clientLeft || 0;
+      const scrollTop = w.pageYOffset || docEl.scrollTop || body.scrollTop;
+      const scrollLeft = w.pageXOffset || docEl.scrollLeft || body.scrollLeft;
+
+      const elComputedStyle = w.getComputedStyle(el, null);
+      const elComputedDisplay = elComputedStyle.display || 'block';
+      const mustDisplayElement = elComputedDisplay === 'none';
+
+      if (mustDisplayElement) {
+        el.style = el.style || {};
+        el.style.display = 'block';
+        box = el.getBoundingClientRect();
+        el.style.display = elComputedDisplay;
+      }
+
+      position.x = Math.round(box.left + scrollLeft - clientLeft);
+      position.y = Math.round(box.top + scrollTop - clientTop);
+    }
+
+    return `${position.x}x${position.y}`;
   },
 
   getTimestamp: function () {
@@ -420,7 +454,7 @@ export const spec = {
 
   buildRequests: function (validBidRequests, bidderRequest) {
     // AdagioBidAdapter works when window.top can be reached only
-    if (!bidderRequest.refererInfo.reachedTop) return [];
+    // if (!bidderRequest.refererInfo.reachedTop) return [];
 
     const secure = (location.protocol === 'https:') ? 1 : 0;
     const device = _getDevice();
