@@ -570,16 +570,16 @@ describe.only('adagioAdapter', () => {
       window.$sf = $sf;
       stubs.$sfGeom = sandbox.stub(window.$sf.ext, 'geom');
       stubs.$sfGeom.returns({
-        win: {w: 300, h: 400},
-        self: {t: 20, l: 100}
+        win: {t: 23, r: 1920, b: 1200, l: 0, w: 1920, h: 1177},
+        self: {t: 210, r: 1159, b: 460, l: 859, w: 300, h: 250},
       });
 
       let requests = spec.buildRequests(bidRequests, bidderRequest);
       const request = requests[0];
       expect(request.data.adUnits[0].features).to.exist;
-      expect(request.data.adUnits[0].features.viewport_dimensions).to.deep.equal('300x400');
-      expect(request.data.adUnits[0].features.page_dimensions).to.deep.equal('');
-      expect(request.data.adUnits[0].features.adunit_position).to.deep.equal('20x100');
+      expect(request.data.adUnits[0].features.viewport_dimensions).to.deep.equal('1920x1177');
+      expect(request.data.adUnits[0].features.page_dimensions).to.deep.equal('1920x1177');
+      expect(request.data.adUnits[0].features.adunit_position).to.deep.equal('210x859');
     });
 
     it('Should add the schain if available at bidder level', () => {
@@ -614,6 +614,20 @@ describe.only('adagioAdapter', () => {
       const requests = spec.buildRequests([bidRequests[0]], bidderRequest);
       const request = requests[0];
       expect(request.data.schain).to.not.exist;
+    });
+
+    it('Should returns the expected computed page_dimensions height in SafeFrame context', () => {
+      sandbox.stub(utils, 'getWindowTop').throws();
+      window.$sf = $sf;
+      stubs.$sfGeom = sandbox.stub(window.$sf.ext, 'geom');
+      stubs.$sfGeom.returns({
+        win: {t: 23, r: 1920, b: 1200, l: 0, w: 1920, h: 1177},
+        self: {t: 1831, r: 308, b: 2081, l: 8, w: 300, h: 250},
+      });
+
+      let requests = spec.buildRequests(bidRequests, bidderRequest);
+      const request = requests[0];
+      expect(request.data.adUnits[0].features.page_dimensions).to.deep.equal('1920x2081');
     });
   });
 

@@ -104,20 +104,38 @@ const _features = {
   },
 
   getPageDimensions: function() {
-    if (isSafeFrameWindow()) return '';
+    let viewportDims;
+    let w;
+    let sfGeom;
+    let pageHeight;
+    const pageDims = {
+      w: 0,
+      h: 0
+    };
 
-    if (!canAccessTopWindow()) return '';
+    if (isSafeFrameWindow()) {
+      w = utils.getWindowSelf();
+      sfGeom = w.$sf.ext.geom();
+      pageHeight = (Math.round(sfGeom.win.h) > Math.round(sfGeom.self.b)) ? Math.round(sfGeom.win.h) : Math.round(sfGeom.self.b);
+      pageDims.w = Math.round(sfGeom.win.w);
+      pageDims.h = pageHeight;
+    } else if (!canAccessTopWindow()) {
+      return '';
+    } else {
+      viewportDims = _features.getViewPortDimensions().split('x');
+      w = utils.getWindowTop();
+      const body = w.document.querySelector('body');
+      if (!body) {
+        return ''
+      }
+      const html = w.document.documentElement;
+      pageHeight = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight);
 
-    const viewportDims = _features.getViewPortDimensions().split('x');
-    const w = utils.getWindowTop();
-    const body = w.document.querySelector('body');
-    if (!body) {
-      return ''
+      pageDims.w = viewportDims[0];
+      pageDims.h = pageHeight;
     }
-    const html = w.document.documentElement;
-    const pageHeight = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight);
 
-    return viewportDims[0] + 'x' + pageHeight;
+    return `${pageDims.w}x${pageDims.h}`;
   },
 
   getViewPortDimensions: function() {
