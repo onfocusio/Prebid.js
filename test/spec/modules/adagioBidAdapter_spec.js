@@ -1,9 +1,9 @@
 import { expect } from 'chai';
-import { adagioScriptFromLocalStorageCb, spec } from 'modules/adagioBidAdapter.js';
+import { _features, adagioScriptFromLocalStorageCb, spec } from 'modules/adagioBidAdapter.js';
 import { newBidder } from 'src/adapters/bidderFactory.js';
 import * as utils from 'src/utils.js';
 
-describe.only('adagioAdapter', () => {
+describe('adagioAdapter', () => {
   let utilsMock;
   const adapter = newBidder(spec);
   const ENDPOINT = 'https://mp.4dex.io/prebid';
@@ -358,11 +358,11 @@ describe.only('adagioAdapter', () => {
       expect(request.data.prebidVersion).to.equal('$prebid.version$');
     });
 
-    it('features params "adunit_position" must be empty if adUnitElement is not found in the DOM', () => {
+    it('features params "adunit_position" must not exists if adUnitElement is not found in the DOM', () => {
       const requests = spec.buildRequests([Object.assign({}, bidRequests[0], {params: {adUnitElementId: 'does-not-exist'}})], bidderRequest);
       const request = requests[0];
       expect(request.data.adUnits[0].features).to.exist;
-      expect(request.data.adUnits[0].features.adunit_position).to.deep.equal('');
+      expect(request.data.adUnits[0].features.adunit_position).to.not.exist;
     });
 
     it('features params "adunit_position" should be computed even if DOM element is display:none', () => {
@@ -552,17 +552,24 @@ describe.only('adagioAdapter', () => {
       let requests = spec.buildRequests([bidRequests[0]], bidderRequest);
       const request = requests[0];
       expect(request.data.adUnits[0].features).to.exist;
-      expect(request.data.adUnits[0].features.page_dimensions).to.deep.equal('');
+      expect(request.data.adUnits[0].features.page_dimensions).to.not.exist;
     });
 
-    it('Should returns empty specifics features if Prebid is in Unfriendly Iframe', () => {
+    it('Should remove specifics features if Prebid is in Unfriendly Iframe', () => {
       sandbox.stub(utils, 'getWindowTop').throws();
       let requests = spec.buildRequests(bidRequests, bidderRequest);
       const request = requests[0];
       expect(request.data.adUnits[0].features).to.exist;
-      expect(request.data.adUnits[0].features.viewport_dimensions).to.deep.equal('');
-      expect(request.data.adUnits[0].features.page_dimensions).to.deep.equal('');
-      expect(request.data.adUnits[0].features.adunit_position).to.deep.equal('');
+      expect(request.data.adUnits[0].features.viewport_dimensions).to.not.exist;
+      expect(request.data.adUnits[0].features.page_dimensions).to.not.exist;
+      expect(request.data.adUnits[0].features.adunit_position).to.not.exist;
+      expect(request.data.adUnits[0].features.print_number).to.be.a('String');
+      expect(request.data.adUnits[0].features.dom_loading).to.be.a('String');
+      expect(request.data.adUnits[0].features.user_timestamp).to.be.a('String');
+      expect(request.data.adUnits[0].features.device).to.be.a('String');
+      expect(request.data.adUnits[0].features.url).to.be.a('String');
+      expect(request.data.adUnits[0].features.browser).to.be.a('String');
+      expect(request.data.adUnits[0].features.os).to.be.a('String');
     });
 
     it('Should returns computed specifics features if Prebid is in SafeFrame', () => {
@@ -580,6 +587,7 @@ describe.only('adagioAdapter', () => {
       expect(request.data.adUnits[0].features.viewport_dimensions).to.deep.equal('1920x1177');
       expect(request.data.adUnits[0].features.page_dimensions).to.deep.equal('1920x1177');
       expect(request.data.adUnits[0].features.adunit_position).to.deep.equal('210x859');
+      delete window.$sf;
     });
 
     it('Should add the schain if available at bidder level', () => {
@@ -628,6 +636,43 @@ describe.only('adagioAdapter', () => {
       let requests = spec.buildRequests(bidRequests, bidderRequest);
       const request = requests[0];
       expect(request.data.adUnits[0].features.page_dimensions).to.deep.equal('1920x2081');
+      delete window.$sf;
+    });
+
+    it('Features object does not include empty properties', () => {
+      sandbox.stub(_features, 'getPageDimensions').returns('');
+      sandbox.stub(_features, 'getViewPortDimensions').returns('');
+      sandbox.stub(_features, 'getSlotPosition').returns('');
+      sandbox.stub(_features, 'getOS').returns('');
+      const requests = spec.buildRequests([Object.assign({}, bidRequests[0])], bidderRequest);
+      let request = requests[0];
+      expect(request.data.adUnits[0].features).to.exist;
+      expect(request.data.adUnits[0].features.adunit_position).to.not.exist;
+      expect(request.data.adUnits[0].features.page_dimensions).to.not.exist;
+      expect(request.data.adUnits[0].features.viewport_dimensions).to.not.exist;
+      expect(request.data.adUnits[0].features.print_number).to.be.a('String');
+      expect(request.data.adUnits[0].features.dom_loading).to.be.a('String');
+      expect(request.data.adUnits[0].features.user_timestamp).to.be.a('String');
+      expect(request.data.adUnits[0].features.device).to.be.a('String');
+      expect(request.data.adUnits[0].features.url).to.be.a('String');
+      expect(request.data.adUnits[0].features.browser).to.be.a('String');
+      expect(request.data.adUnits[0].features.os).to.not.exist;
+    });
+
+    it('Features object properties must be a string', () => {
+      const requests = spec.buildRequests([Object.assign({}, bidRequests[0])], bidderRequest);
+      let request = requests[0];
+      expect(request.data.adUnits[0].features).to.exist;
+      expect(request.data.adUnits[0].features.adunit_position).to.be.a('String');
+      expect(request.data.adUnits[0].features.page_dimensions).to.be.a('String');
+      expect(request.data.adUnits[0].features.viewport_dimensions).to.be.a('String');
+      expect(request.data.adUnits[0].features.print_number).to.be.a('String');
+      expect(request.data.adUnits[0].features.dom_loading).to.be.a('String');
+      expect(request.data.adUnits[0].features.user_timestamp).to.be.a('String');
+      expect(request.data.adUnits[0].features.device).to.be.a('String');
+      expect(request.data.adUnits[0].features.url).to.be.a('String');
+      expect(request.data.adUnits[0].features.browser).to.be.a('String');
+      expect(request.data.adUnits[0].features.os).to.be.a('String');
     });
   });
 

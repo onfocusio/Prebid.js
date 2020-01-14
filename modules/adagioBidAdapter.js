@@ -97,8 +97,8 @@ function initAdagio() {
 initAdagio();
 // }
 
-const _features = {
-  getPrintNumber: function (adUnitCode) {
+export const _features = {
+  getPrintNumber: function(adUnitCode) {
     const adagioAdUnit = _getOrAddAdagioAdUnit(adUnitCode);
     return adagioAdUnit.printNumber || 1;
   },
@@ -386,6 +386,12 @@ function _getFeatures(bidRequest) {
     browser: _features.getBrowser(),
     os: _features.getOS()
   };
+
+  Object.keys(features).forEach((prop) => {
+    if (features[prop] === '') {
+      delete features[prop];
+    }
+  });
 
   const adUnitFeature = {};
   adUnitFeature[adUnitElementId] = {
