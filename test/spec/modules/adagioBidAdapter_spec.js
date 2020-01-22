@@ -607,7 +607,7 @@ describe('adagioAdapter', () => {
     });
   });
 
-  describe('getUserSyncs', () => {
+  describe.only('getUserSyncs', () => {
     const syncOptions = {
       'iframeEnabled': 'true'
     }
@@ -616,12 +616,12 @@ describe('adagioAdapter', () => {
         body: {
           userSyncs: [
             {
-              t: 'i',
-              u: 'https://test.url.com/setuid'
+              type: 'iframe',
+              url: 'https://test.url.com/setuid'
             },
             {
-              t: 'p',
-              u: 'https://test.url.com/setuid'
+              type: 'image',
+              url: 'https://test.url.com/setuid'
             }
           ]
         }

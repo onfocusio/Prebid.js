@@ -467,8 +467,8 @@ export const spec = {
     }
     const syncs = serverResponses[0].body.userSyncs.map((sync) => {
       return {
-        type: sync.t === 'p' ? 'image' : 'iframe',
-        url: sync.u
+        type: sync.type,
+        url: sync.url
       }
     })
     return syncs;
