@@ -607,7 +607,7 @@ describe('adagioAdapter', () => {
     });
   });
 
-  describe.only('getUserSyncs', () => {
+  describe('getUserSyncs', () => {
     const syncOptions = {
       'iframeEnabled': 'true'
     }
@@ -621,6 +621,14 @@ describe('adagioAdapter', () => {
             },
             {
               type: 'image',
+              url: 'https://test.url.com/setuid'
+            },
+            {
+              type: 'script',
+              url: 'https://test.url.com/setuid'
+            },
+            {
+              type: 'foo',
               url: 'https://test.url.com/setuid'
             }
           ]
@@ -637,6 +645,7 @@ describe('adagioAdapter', () => {
     it('should handle correctly user syncs', () => {
       let result = spec.getUserSyncs(syncOptions, serverResponses);
       let emptyResult = spec.getUserSyncs(syncOptions, emptyServerResponses);
+      expect(result).to.have.lengthOf(2);
       expect(result[0].type).to.equal('iframe');
       expect(result[0].url).contain('setuid');
       expect(result[1].type).to.equal('image');

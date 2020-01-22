@@ -465,12 +465,14 @@ export const spec = {
     if (!serverResponses.length || serverResponses[0].body === '' || !serverResponses[0].body.userSyncs) {
       return false;
     }
-    const syncs = serverResponses[0].body.userSyncs.map((sync) => {
-      return {
-        type: sync.type,
-        url: sync.url
-      }
-    })
+    const syncs = serverResponses[0].body.userSyncs
+      .filter((sync) => ['image', 'iframe'].indexOf(sync.type) !== -1)
+      .map((sync) => {
+        return {
+          type: sync.type,
+          url: sync.url
+        }
+      })
     return syncs;
   }
 }
