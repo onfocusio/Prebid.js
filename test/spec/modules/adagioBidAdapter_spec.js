@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import { getAdagioScript, spec } from 'modules/adagioBidAdapter';
 import { newBidder } from 'src/adapters/bidderFactory';
 import * as utils from 'src/utils';
+import { OUTSTREAM, isValidVideoBid } from '../../../src/video';
 
 describe('adagioAdapter', () => {
   let utilsMock;
@@ -500,7 +501,20 @@ describe('adagioAdapter', () => {
             requestId: 'c180kg4267tyqz',
             ttl: 360,
             width: 300
-          }
+          },
+          {
+            ad: '<div style="background-color:red; height:250px; width:300px"></div>',
+            cpm: 1,
+            creativeId: 'creativeId',
+            currency: 'EUR',
+            height: 250,
+            netRevenue: true,
+            requestId: 'c180kg4267tyqz',
+            ttl: 360,
+            width: 300,
+            context: OUTSTREAM,
+            vastXml: '<?xml version=\"1.0\" />'
+          },
         ]
       }
     };
@@ -547,6 +561,15 @@ describe('adagioAdapter', () => {
             'bidderRequestId': '8vfscuixrovn8i',
             'auctionId': 'lel4fhp239i9km',
             'pageviewId': 'd8c4fl2k39i0wn',
+            'mediaTypes': {
+              banner: {
+                sizes: [[300, 250]]
+              },
+              video: {
+                context: OUTSTREAM,
+                playerSize: [300, 250],
+              }
+            },
           }
         ]
       }
@@ -566,7 +589,7 @@ describe('adagioAdapter', () => {
     });
 
     it('should get correct bid response', () => {
-      let expectedResponse = [{
+      let expectedResponse = {
         ad: '<div style="background-color:red; height:250px; width:300px"></div>',
         cpm: 1,
         creativeId: 'creativeId',
@@ -582,9 +605,9 @@ describe('adagioAdapter', () => {
         category: 'NEWS',
         subcategory: 'SPORT',
         environment: 'SITE-MOBILE'
-      }];
+      };
       expect(spec.interpretResponse(serverResponse, bidRequest)).to.be.an('array');
-      expect(spec.interpretResponse(serverResponse, bidRequest)).to.deep.equal(expectedResponse);
+      expect(spec.interpretResponse(serverResponse, bidRequest)[0]).to.deep.equal(expectedResponse);
     });
 
     it('Should populate ADAGIO queue with ssp-data', () => {
@@ -604,6 +627,13 @@ describe('adagioAdapter', () => {
 
     it('should return an empty response even if an exception is ', () => {
       expect(spec.interpretResponse(serverResponseWhichThrowsException, bidRequest)).to.be.an('array').length(0);
+    });
+
+    it('Should handle outstream format', () => {
+      const r = spec.interpretResponse(serverResponse, bidRequest);
+      expect(isValidVideoBid(r[1], [{bids: bidRequest.data.adUnits}])).ok;
+      expect(r[1].context).to.equal(OUTSTREAM);
+      expect(r[1].renderer).ok;
     });
   });
 

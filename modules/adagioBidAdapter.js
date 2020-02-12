@@ -4,14 +4,17 @@ import {registerBidder} from '../src/adapters/bidderFactory';
 import { loadExternalScript } from '../src/adloader'
 import JSEncrypt from 'jsencrypt/bin/jsencrypt';
 import sha256 from 'crypto-js/sha256';
+import {BANNER, VIDEO} from '../src/mediaTypes';
+import { Renderer } from '../src/Renderer';
 
 const BIDDER_CODE = 'adagio';
 const VERSION = '2.1.0';
 const FEATURES_VERSION = '1';
 const ENDPOINT = 'https://mp.4dex.io/prebid';
-const SUPPORTED_MEDIA_TYPES = ['banner'];
+const SUPPORTED_MEDIA_TYPES = [BANNER, VIDEO];
 const ADAGIO_TAG_URL = 'https://script.4dex.io/localstore.js';
 const ADAGIO_LOCALSTORAGE_KEY = 'adagioScript';
+const RENDERER_URL = 'https://acdn.adnxs.com/video/outstream/ANOutstreamVideo.js';
 
 export const ADAGIO_PUBKEY = `-----BEGIN PUBLIC KEY-----
 MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC9el0+OEn6fvEh1RdVHQu4cnT0
@@ -338,6 +341,41 @@ function _getGdprConsent(bidderRequest) {
   return consent;
 }
 
+function createRenderer(options) {
+  const { adUnitCode, config, id, url } = options;
+  const renderer = Renderer.install({
+    adUnitCode,
+    id,
+    url,
+    loaded: false,
+    config
+  });
+
+  try {
+    renderer.setRender((bid) => {
+      bid.renderer.push(() => {
+        window.ANOutstreamVideo.renderAd({
+          sizes: [
+            bid.width,
+            bid.height
+          ],
+          width: bid.width,
+          height: bid.height,
+          targetId: bid.adUnitCode,
+          adResponse: bid.ad,
+          rendererOptions: {
+            showVolume: false,
+            allowFullscreen: false
+          }
+        });
+      });
+    });
+  } catch (err) {
+    utils.logWarn('Prebid Error calling setRender on renderer', err);
+  }
+  return renderer;
+}
+
 export const spec = {
   code: BIDDER_CODE,
 
@@ -443,6 +481,21 @@ export const spec = {
         if (response.bids) {
           response.bids.forEach(bidObj => {
             const bidReq = (find(bidRequest.data.adUnits, bid => bid.bidId === bidObj.requestId));
+
+            // Outstream video context
+            if (bidObj.context === 'outstream') {
+              const outstreamOptions = {
+                id: bidObj.requestId,
+                url: RENDERER_URL,
+                adUnitCode: bidObj.adUnitCode,
+                config: {
+                  player_width: bidObj.width,
+                  player_height: bidObj.height,
+                }
+              };
+              bidObj.renderer = createRenderer(outstreamOptions);
+            }
+
             if (bidReq) {
               bidObj.site = bidReq.params.site;
               bidObj.placement = bidReq.params.placement;
