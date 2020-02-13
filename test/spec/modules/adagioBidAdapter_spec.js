@@ -3,6 +3,7 @@ import { getAdagioScript, spec } from 'modules/adagioBidAdapter';
 import { newBidder } from 'src/adapters/bidderFactory';
 import * as utils from 'src/utils';
 import { OUTSTREAM, isValidVideoBid } from '../../../src/video';
+import { BANNER, VIDEO } from '../../../src/mediaTypes';
 
 describe('adagioAdapter', () => {
   let utilsMock;
@@ -500,7 +501,8 @@ describe('adagioAdapter', () => {
             netRevenue: true,
             requestId: 'c180kg4267tyqz',
             ttl: 360,
-            width: 300
+            width: 300,
+            mediaType: BANNER
           },
           {
             ad: '<div style="background-color:red; height:250px; width:300px"></div>',
@@ -512,8 +514,8 @@ describe('adagioAdapter', () => {
             requestId: 'c180kg4267tyqz',
             ttl: 360,
             width: 300,
-            context: OUTSTREAM,
-            vastXml: '<?xml version=\"1.0\" />'
+            mediaType: VIDEO,
+            context: OUTSTREAM
           },
         ]
       }
@@ -599,6 +601,7 @@ describe('adagioAdapter', () => {
         requestId: 'c180kg4267tyqz',
         ttl: 360,
         width: 300,
+        mediaType: BANNER,
         placement: 'PAVE_ATF-456',
         site: 'ADAGIO-456',
         pagetype: 'ARTICLE',
@@ -632,6 +635,7 @@ describe('adagioAdapter', () => {
     it('Should handle outstream format', () => {
       const r = spec.interpretResponse(serverResponse, bidRequest);
       expect(isValidVideoBid(r[1], [{bids: bidRequest.data.adUnits}])).ok;
+      expect(r[1].mediaType).to.equal(VIDEO);
       expect(r[1].context).to.equal(OUTSTREAM);
       expect(r[1].renderer).ok;
     });

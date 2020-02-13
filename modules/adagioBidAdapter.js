@@ -6,6 +6,7 @@ import JSEncrypt from 'jsencrypt/bin/jsencrypt';
 import sha256 from 'crypto-js/sha256';
 import {BANNER, VIDEO} from '../src/mediaTypes';
 import { Renderer } from '../src/Renderer';
+import { OUTSTREAM } from '../src/video';
 
 const BIDDER_CODE = 'adagio';
 const VERSION = '2.1.0';
@@ -341,6 +342,18 @@ function _getGdprConsent(bidderRequest) {
   return consent;
 }
 
+function outstreamRender(bid) {
+  bid.renderer.push(() => {
+    window.ANOutstreamVideo.renderAd({
+      targetId: bid.adUnitCode,
+      adResponse: {
+        content: bid.ad,
+      },
+      rendererOptions: bid.renderer.getConfig()
+    });
+  });
+}
+
 function createRenderer(options) {
   const { adUnitCode, config, id, url } = options;
   const renderer = Renderer.install({
@@ -352,34 +365,18 @@ function createRenderer(options) {
   });
 
   try {
-    renderer.setRender((bid) => {
-      bid.renderer.push(() => {
-        window.ANOutstreamVideo.renderAd({
-          sizes: [
-            bid.width,
-            bid.height
-          ],
-          width: bid.width,
-          height: bid.height,
-          targetId: bid.adUnitCode,
-          adResponse: bid.ad,
-          rendererOptions: {
-            showVolume: false,
-            allowFullscreen: false
-          }
-        });
-      });
-    });
+    renderer.setRender(outstreamRender);
   } catch (err) {
     utils.logWarn('Prebid Error calling setRender on renderer', err);
   }
+
   return renderer;
 }
 
 export const spec = {
   code: BIDDER_CODE,
 
-  supportedMediaType: SUPPORTED_MEDIA_TYPES,
+  supportedMediaTypes: SUPPORTED_MEDIA_TYPES,
 
   isBidRequestValid: function(bid) {
     const { adUnitCode, auctionId, sizes, bidder, params, mediaTypes } = bid;
@@ -482,21 +479,19 @@ export const spec = {
           response.bids.forEach(bidObj => {
             const bidReq = (find(bidRequest.data.adUnits, bid => bid.bidId === bidObj.requestId));
 
-            // Outstream video context
-            if (bidObj.context === 'outstream') {
-              const outstreamOptions = {
-                id: bidObj.requestId,
-                url: RENDERER_URL,
-                adUnitCode: bidObj.adUnitCode,
-                config: {
-                  player_width: bidObj.width,
-                  player_height: bidObj.height,
-                }
-              };
-              bidObj.renderer = createRenderer(outstreamOptions);
-            }
-
             if (bidReq) {
+              const videoTypeContext = utils.deepAccess(bidReq, 'mediaTypes.video.context');
+
+              if (bidObj.mediaType === VIDEO && videoTypeContext === OUTSTREAM) {
+                const outstreamOptions = {
+                  id: bidObj.requestId,
+                  url: RENDERER_URL,
+                  adUnitCode: bidObj.adUnitCode,
+                  config: utils.deepAccess(bidReq, 'renderer.options')
+                };
+                bidObj.renderer = createRenderer(outstreamOptions);
+              }
+
               bidObj.site = bidReq.params.site;
               bidObj.placement = bidReq.params.placement;
               bidObj.pagetype = bidReq.params.pagetype;
