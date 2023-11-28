@@ -211,7 +211,10 @@ const BID_ADAGIO = Object.assign({}, BID_ADAGIO, {
   meta: {
     advertiserDomains: ['example.com']
   },
-  seatId: '42',
+  pba: {
+    adg_sid: '42',
+    pba_test: true
+  }
 });
 
 const BID_ANOTHER = Object.assign({}, BID_ANOTHER, {
@@ -684,6 +687,8 @@ describe('adagio analytics adapter', () => {
         expect(hostname).to.equal('c.4dex.io');
         expect(pathname).to.equal('/pba.gif');
         expect(search.v).to.equal('2');
+        expect(search.adg_sid).to.equal('42');
+        expect(search.pba_test).to.equal('true');
         expect(search.bdrs_bid).to.equal('1,1,0');
       }
 
@@ -695,7 +700,6 @@ describe('adagio analytics adapter', () => {
         expect(search.v).to.equal('3');
         expect(search.auct_id).to.equal(AUCTION_ID_ADAGIO);
         expect(search.adu_code).to.equal('/19968336/header-bid-tag-1');
-        expect(search.adg_sid).to.equal('42');
         expect(search.win_bdr).to.equal('another');
         expect(search.win_mt).to.equal('ban');
         expect(search.win_ban_sz).to.equal('728x90');
@@ -791,6 +795,8 @@ describe('adagio analytics adapter', () => {
         expect(hostname).to.equal('c.4dex.io');
         expect(pathname).to.equal('/pba.gif');
         expect(search.v).to.equal('2');
+        expect(search.adg_sid).to.equal('42');
+        expect(search.pba_test).to.equal('true');
         expect(search.bdrs_bid).to.equal('0,0,0');
       }
 
@@ -803,7 +809,6 @@ describe('adagio analytics adapter', () => {
         expect(search.auct_id).to.equal(AUCTION_ID_ADAGIO);
         expect(search.auct_id_c).to.equal(AUCTION_ID_CACHE_ADAGIO);
         expect(search.adu_code).to.equal('/19968336/header-bid-tag-1');
-        expect(search.adg_sid).to.equal('42');
         expect(search.win_bdr).to.equal('adagio');
         expect(search.win_mt).to.equal('ban');
         expect(search.win_ban_sz).to.equal('728x90');

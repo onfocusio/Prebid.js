@@ -265,8 +265,12 @@ function handlerBidResponse(event) {
     return;
   }
 
+  if (!event.pba) {
+    return;
+  }
+
   cache.updateAuction(event.auctionId, event.adUnitCode, {
-    adg_sid: event.seatId || null
+    ...event.pba
   });
 };
 
@@ -372,7 +376,8 @@ let adagioAdapter = Object.assign(adapter({ emptyUrl, analyticsType }), {
         case CONSTANTS.EVENTS.BID_WON:
           handlerBidWon(args);
           break;
-        case CONSTANTS.EVENTS.AD_RENDER_SUCCEEDED:
+        // AD_RENDER_SUCCEEDED seems redundant with BID_WON.
+        // case CONSTANTS.EVENTS.AD_RENDER_SUCCEEDED:
         case CONSTANTS.EVENTS.AD_RENDER_FAILED:
           handlerAdRender(args, eventType === CONSTANTS.EVENTS.AD_RENDER_SUCCEEDED);
           break;
