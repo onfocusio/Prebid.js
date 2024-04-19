@@ -115,22 +115,8 @@ export const GlobalExchange = (function() {
           return value;
         }
       });
-      let random = deepAccess(adagioStorage, 'session.rnd');
-      let newSession = false;
 
-      if (internal.isNewSession(adagioStorage)) {
-        newSession = true;
-        random = Math.random();
-      }
-
-      const data = {
-        session: {
-          new: newSession,
-          rnd: random
-        }
-      }
-
-      mergeDeep(exchangeData, adagioStorage, data);
+      mergeDeep(exchangeData, adagioStorage);
 
       internal.enqueue({
         action: 'session',
