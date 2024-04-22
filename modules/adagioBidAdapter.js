@@ -1,4 +1,16 @@
-import {find} from '../src/polyfill.js';
+import { getGptSlotInfoForAdUnitCode } from '../libraries/gptUtils/gptUtils.js';
+import { Renderer } from '../src/Renderer.js';
+import { registerBidder } from '../src/adapters/bidderFactory.js';
+import { loadExternalScript } from '../src/adloader.js';
+import { bidderSettings } from '../src/bidderSettings.js';
+import { config } from '../src/config.js';
+import { BANNER, NATIVE, VIDEO } from '../src/mediaTypes.js';
+import { convertOrtbRequestToProprietaryNative } from '../src/native.js';
+import { find } from '../src/polyfill.js';
+import { getGlobal } from '../src/prebidGlobal.js';
+import { getRefererInfo, parseDomain } from '../src/refererDetection.js';
+import { getStorageManager } from '../src/storageManager.js';
+import { userSync } from '../src/userSync.js';
 import {
   cleanObj,
   deepAccess,
@@ -10,29 +22,17 @@ import {
   getWindowTop,
   inIframe,
   isArray,
+  isArrayOfNums,
   isFn,
   isInteger,
   isNumber,
-  isArrayOfNums,
+  isStr,
   logError,
   logInfo,
   logWarn,
   mergeDeep,
-  isStr,
 } from '../src/utils.js';
-import {config} from '../src/config.js';
-import {registerBidder} from '../src/adapters/bidderFactory.js';
-import {loadExternalScript} from '../src/adloader.js';
-import {getStorageManager} from '../src/storageManager.js';
-import {getRefererInfo, parseDomain} from '../src/refererDetection.js';
-import {BANNER, NATIVE, VIDEO} from '../src/mediaTypes.js';
-import {Renderer} from '../src/Renderer.js';
-import {OUTSTREAM} from '../src/video.js';
-import { getGlobal } from '../src/prebidGlobal.js';
-import { convertOrtbRequestToProprietaryNative } from '../src/native.js';
-import { userSync } from '../src/userSync.js';
-import {getGptSlotInfoForAdUnitCode} from '../libraries/gptUtils/gptUtils.js';
-import {bidderSettings} from '../src/bidderSettings.js';
+import { OUTSTREAM } from '../src/video.js';
 
 const BIDDER_CODE = 'adagio';
 const LOG_PREFIX = 'Adagio:';
@@ -225,7 +225,10 @@ function initAdagio() {
     }
   });
 
-  getAdagioScript();
+  if (getWindowTop().ADAGIO.USE_RTD_MODULE) {
+    logWarn(LOG_PREFIX, 'Load Adagio.js from Bid Adapter')
+    getAdagioScript();
+  }
 }
 
 function enqueue(ob) {
