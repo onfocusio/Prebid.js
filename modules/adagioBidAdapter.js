@@ -225,7 +225,7 @@ function initAdagio() {
     }
   });
 
-  if (getWindowTop().ADAGIO.USE_RTD_MODULE) {
+  if (w.ADAGIO.USE_RTD_MODULE) {
     logWarn(LOG_PREFIX, 'Load Adagio.js from Bid Adapter')
     getAdagioScript();
   }
@@ -986,12 +986,24 @@ export const spec = {
       // Fix https://github.com/prebid/Prebid.js/issues/9781
       bidRequest.auctionId = aucId
 
-      const globalFeatures = GlobalExchange.getOrSetGlobalFeatures();
-      const features = {
-        ...globalFeatures,
-        print_number: getPrintNumber(bidRequest.adUnitCode, bidderRequest).toString(),
-        adunit_position: getSlotPosition(bidRequest.params.adUnitElementId) // adUnitElementId à déplacer ???
-      };
+      const w = internal.getCurrentWindow();
+
+      if (!w.ADAGIO.USE_RTD_MODULE) {
+        const globalFeatures = GlobalExchange.getOrSetGlobalFeatures();
+        const features = {
+          ...globalFeatures,
+          print_number: getPrintNumber(bidRequest.adUnitCode, bidderRequest).toString(),
+          adunit_position: getSlotPosition(bidRequest.params.adUnitElementId) // adUnitElementId à déplacer ???
+        };
+
+        Object.keys(features).forEach((prop) => {
+          if (features[prop] === '') {
+            delete features[prop];
+          }
+        });
+
+        bidRequest.features = features;
+      }
 
       // Force the Split Keyword to be a String
       if (bidRequest.params.splitKeyword) {
@@ -1035,14 +1047,6 @@ export const spec = {
           }
         }
       }
-
-      Object.keys(features).forEach((prop) => {
-        if (features[prop] === '') {
-          delete features[prop];
-        }
-      });
-
-      bidRequest.features = features;
 
       internal.enqueue({
         action: 'features',
