@@ -73,7 +73,10 @@ const _SESSION = (function() {
 
       storage.getDataFromLocalStorage('adagio', (storageValue) => {
         // session can be an empty object
-        const { rnd, new: isNew, vwSmplg, vwSmplgNxt, lastActivityTime } = _internal.getSessionFromLocalStorage(storageValue);
+        const { rnd, new: isNew, vwSmplg, vwSmplgNxt, lastActivityTime, sessionId, testName, testVersion, initiator } = _internal.getSessionFromLocalStorage(storageValue);
+
+        // isNew can be `true` if the session has been initialized by our A/B test snippet. In other case it doesn't exist.
+        const isNewSess = isNew || isNewSession(lastActivityTime);
 
         data.session = {
           rnd,
@@ -81,12 +84,20 @@ const _SESSION = (function() {
           // Don't use values if they are not defined.
           ...(vwSmplg !== undefined && { vwSmplg }),
           ...(vwSmplgNxt !== undefined && { vwSmplgNxt }),
-          ...(lastActivityTime !== undefined && { lastActivityTime })
+          ...(lastActivityTime !== undefined && { lastActivityTime }),
+          ...(sessionId !== undefined && { sessionId }),
+          ...(testName !== undefined && { testName }),
+          ...(testVersion !== undefined && { testVersion }),
+          ...(initiator !== undefined && { initiator }),
         };
 
-        if (isNewSession(lastActivityTime)) {
+        if ((isNewSess && initiator !== 'snippet') || (testName && initiator !== 'snippet')) {
           data.session.new = true;
+          data.session.sessionId = generateUUID();
           data.session.rnd = Math.random();
+          // Ensure that the A/B test values are removed.
+          delete data.session.testName;
+          delete data.session.testVersion;
         }
 
         _internal.getAdagioNs().queue.push({

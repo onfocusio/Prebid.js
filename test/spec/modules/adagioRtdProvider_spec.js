@@ -118,6 +118,7 @@ describe('Adagio Rtd Provider', function () {
     describe('store session data in localStorage', function () {
       const session = {
         lastActivityTime: 1714116520700,
+        sessionId: 'uid-1234',
         rnd: 0.5697,
         vwSmplg: 0.1,
         vwSmplgNxt: 0.1
@@ -128,6 +129,7 @@ describe('Adagio Rtd Provider', function () {
         sandbox.stub(storage, 'getDataFromLocalStorage').callsArgWith(1, storageValue);
         sandbox.stub(Date, 'now').returns(1714116520710);
         sandbox.stub(Math, 'random').returns(0.8);
+        sandbox.stub(utils, 'generateUUID').returns('uid-1234');
 
         const spy = sandbox.spy(_internal.getAdagioNs().queue, 'push')
 
@@ -136,6 +138,7 @@ describe('Adagio Rtd Provider', function () {
         const expected = {
           session: {
             new: true,
+            sessionId: utils.generateUUID(),
             rnd: Math.random()
           }
         }
@@ -176,6 +179,7 @@ describe('Adagio Rtd Provider', function () {
         sandbox.stub(Date, 'now').returns(1715679344351);
         sandbox.stub(storage, 'getDataFromLocalStorage').callsArgWith(1, storageValue);
         sandbox.stub(Math, 'random').returns(0.8);
+        sandbox.stub(utils, 'generateUUID').returns('uid-5678');
 
         const spy = sandbox.spy(_internal.getAdagioNs().queue, 'push')
 
@@ -185,6 +189,7 @@ describe('Adagio Rtd Provider', function () {
           session: {
             ...session,
             new: true,
+            sessionId: utils.generateUUID(),
             rnd: Math.random(),
           }
         }
