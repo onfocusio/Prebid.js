@@ -9,6 +9,7 @@ import { ajax } from '../src/ajax.js';
 import { BANNER } from '../src/mediaTypes.js';
 import { getWindowTop, getWindowSelf, deepAccess, logInfo, logError } from '../src/utils.js';
 import { getGlobal } from '../src/prebidGlobal.js';
+import { config } from '../src/config.js';
 
 const emptyUrl = '';
 const analyticsType = 'endpoint';
@@ -36,15 +37,6 @@ const cache = {
       ...values
     };
   },
-
-  // Map prebid auction id to adagio auction id
-  auctionIdReferences: {},
-  addPrebidAuctionIdRef(auctionId, adagioAuctionId) {
-    this.auctionIdReferences[auctionId] = adagioAuctionId;
-  },
-  getAdagioAuctionId(auctionId) {
-    return this.auctionIdReferences[auctionId];
-  }
 };
 const enc = window.encodeURIComponent;
 
@@ -250,9 +242,6 @@ function handlerAuctionInit(event) {
     // We assume that all Adagio bids for a same adunit have the same params.
     const params = adagioAdUnitBids[0].params;
 
-    const adagioAuctionId = params.adagioAuctionId;
-    cache.addPrebidAuctionIdRef(prebidAuctionId, adagioAuctionId);
-
     // Get all media types requested for Adagio.
     const adagioMediaTypes = removeDuplicates(
       adagioAdUnitBids.map(bid => Object.keys(bid.mediaTypes)).flat(),
@@ -265,7 +254,7 @@ function handlerAuctionInit(event) {
       org_id: params.organizationId,
       site: params.site,
       pv_id: params.pageviewId,
-      auct_id: adagioAuctionId,
+      auct_id: prebidAuctionId,
       adu_code: adUnitCode,
       url_dmn: w.location.hostname,
       pgtyp: params.pagetype,
@@ -342,9 +331,8 @@ function handlerBidWon(event) {
 
   const adagioAuctionCacheId = (
     (event.latestTargetedAuctionId && event.latestTargetedAuctionId !== event.auctionId)
-      ? cache.getAdagioAuctionId(event.auctionId)
+      ? event.auctionId
       : null);
-
   cache.updateAuction(auctionId, event.adUnitCode, {
     win_bdr: event.bidder,
     win_mt: getMediaTypeAlias(event.mediaType),
@@ -417,7 +405,12 @@ let adagioAdapter = Object.assign(adapter({ emptyUrl, analyticsType }), {
 
 adagioAdapter.originEnableAnalytics = adagioAdapter.enableAnalytics;
 
-adagioAdapter.enableAnalytics = config => {
+adagioAdapter.enableAnalytics = adapterConfig => {
+  if (config.getConfig('enableTIDs') !== true) {
+    logError('Adagio Analytics Adapter requires prebid settings enableTIDs to be true. No beacon will be sent');
+    return;
+  }
+
   const w = (canAccessTopWindow()) ? getWindowTop() : getWindowSelf();
   currentWindow = w;
 
@@ -426,7 +419,7 @@ adagioAdapter.enableAnalytics = config => {
   w.ADAGIO.versions = w.ADAGIO.versions || {};
   w.ADAGIO.versions.adagioAnalyticsAdapter = VERSION;
 
-  adagioAdapter.originEnableAnalytics(config);
+  adagioAdapter.originEnableAnalytics(adapterConfig);
 }
 
 adapterManager.registerAnalyticsAdapter({

@@ -1,6 +1,7 @@
 import adagioAnalyticsAdapter from 'modules/adagioAnalyticsAdapter.js';
 import { expect } from 'chai';
 import * as utils from 'src/utils.js';
+import { config } from 'src/config.js';
 import { server } from 'test/mocks/xhr.js';
 import * as prebidGlobal from 'src/prebidGlobal.js';
 import { EVENTS } from 'src/constants.js';
@@ -16,6 +17,7 @@ describe('adagio analytics adapter - adagio.js', () => {
     sandbox = sinon.createSandbox();
 
     sandbox.stub(events, 'getEvents').returns([]);
+    config.setConfig({enableTIDs: true});
 
     const w = utils.getWindowTop();
 
@@ -93,7 +95,6 @@ describe('adagio analytics adapter - adagio.js', () => {
 
       // Step 1-3: Send events
       Object.entries(testEvents).forEach(([ev, payload]) => events.emit(ev, payload));
-
       function eventItem(eventName, args) {
         return sinon.match({
           action: 'pb-analytics-event',
@@ -178,9 +179,7 @@ describe('adagio analytics adapter - adagio.js', () => {
 });
 
 const AUCTION_ID = '25c6d7f5-699a-4bfc-87c9-996f915341fa';
-const AUCTION_ID_ADAGIO = '6fc53663-bde5-427b-ab63-baa9ed296f47'
 const AUCTION_ID_CACHE = 'b43d24a0-13d4-406d-8176-3181402bafc4';
-const AUCTION_ID_CACHE_ADAGIO = 'a9cae98f-efb5-477e-9259-27350044f8db';
 
 const BID_ADAGIO = {
   bidder: 'adagio',
@@ -395,8 +394,7 @@ const AUCTION_INIT_ANOTHER = {
     'bids': [ {
       'bidder': 'adagio',
       'params': {
-        ...PARAMS_ADG,
-        adagioAuctionId: AUCTION_ID_ADAGIO
+        ...PARAMS_ADG
       },
       'mediaTypes': {
         'banner': {
@@ -532,8 +530,7 @@ const AUCTION_INIT_CACHE = {
     'bids': [ {
       'bidder': 'adagio',
       'params': {
-        ...PARAMS_ADG,
-        adagioAuctionId: AUCTION_ID_CACHE_ADAGIO
+        ...PARAMS_ADG
       },
       'mediaTypes': {
         'banner': {
@@ -620,6 +617,7 @@ const MOCK = {
 describe('adagio analytics adapter', () => {
   let sandbox;
 
+  config.setConfig({enableTIDs: true});
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
 
@@ -676,7 +674,7 @@ describe('adagio analytics adapter', () => {
         expect(pathname).to.equal('/pba.gif');
         expect(search.v).to.equal('1');
         expect(search.pbjsv).to.equal('$prebid.version$');
-        expect(search.auct_id).to.equal(AUCTION_ID_ADAGIO);
+        expect(search.auct_id).to.equal(AUCTION_ID);
         expect(search.adu_code).to.equal('/19968336/header-bid-tag-1');
         expect(search.org_id).to.equal('1001');
         expect(search.site).to.equal('test-com');
@@ -708,7 +706,7 @@ describe('adagio analytics adapter', () => {
         expect(hostname).to.equal('c.4dex.io');
         expect(pathname).to.equal('/pba.gif');
         expect(search.v).to.equal('3');
-        expect(search.auct_id).to.equal(AUCTION_ID_ADAGIO);
+        expect(search.auct_id).to.equal(AUCTION_ID);
         expect(search.adu_code).to.equal('/19968336/header-bid-tag-1');
         expect(search.win_bdr).to.equal('another');
         expect(search.win_mt).to.equal('ban');
@@ -749,7 +747,7 @@ describe('adagio analytics adapter', () => {
         expect(pathname).to.equal('/pba.gif');
         expect(search.v).to.equal('1');
         expect(search.pbjsv).to.equal('$prebid.version$');
-        expect(search.auct_id).to.equal(AUCTION_ID_CACHE_ADAGIO);
+        expect(search.auct_id).to.equal(AUCTION_ID_CACHE);
         expect(search.adu_code).to.equal('/19968336/header-bid-tag-1');
         expect(search.org_id).to.equal('1001');
         expect(search.site).to.equal('test-com');
@@ -772,7 +770,7 @@ describe('adagio analytics adapter', () => {
         expect(pathname).to.equal('/pba.gif');
         expect(search.v).to.equal('1');
         expect(search.pbjsv).to.equal('$prebid.version$');
-        expect(search.auct_id).to.equal(AUCTION_ID_ADAGIO);
+        expect(search.auct_id).to.equal(AUCTION_ID);
         expect(search.adu_code).to.equal('/19968336/header-bid-tag-1');
         expect(search.org_id).to.equal('1001');
         expect(search.site).to.equal('test-com');
@@ -804,8 +802,8 @@ describe('adagio analytics adapter', () => {
         expect(hostname).to.equal('c.4dex.io');
         expect(pathname).to.equal('/pba.gif');
         expect(search.v).to.equal('3');
-        expect(search.auct_id).to.equal(AUCTION_ID_ADAGIO);
-        expect(search.auct_id_c).to.equal(AUCTION_ID_CACHE_ADAGIO);
+        expect(search.auct_id).to.equal(AUCTION_ID);
+        expect(search.auct_id_c).to.equal(AUCTION_ID_CACHE);
         expect(search.adu_code).to.equal('/19968336/header-bid-tag-1');
         expect(search.win_bdr).to.equal('adagio');
         expect(search.win_mt).to.equal('ban');
@@ -821,8 +819,8 @@ describe('adagio analytics adapter', () => {
         expect(hostname).to.equal('c.4dex.io');
         expect(pathname).to.equal('/pba.gif');
         expect(search.v).to.equal('4');
-        expect(search.auct_id).to.equal(AUCTION_ID_ADAGIO);
-        expect(search.auct_id_c).to.equal(AUCTION_ID_CACHE_ADAGIO);
+        expect(search.auct_id).to.equal(AUCTION_ID);
+        expect(search.auct_id_c).to.equal(AUCTION_ID_CACHE);
         expect(search.adu_code).to.equal('/19968336/header-bid-tag-1');
         expect(search.rndr).to.equal('0');
       }
@@ -852,6 +850,54 @@ describe('adagio analytics adapter', () => {
         expect(search.bdrs_bid).to.equal('1,1,0');
         expect(search.bdrs_cpm).to.equal('1.42,,');
       }
+    });
+  });
+});
+
+describe('adagio analytics adapter with enableTIDs = false', () => {
+  let sandbox;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+
+    sandbox.stub(events, 'getEvents').returns([]);
+    config.setConfig({enableTIDs: false});
+
+    adapterManager.registerAnalyticsAdapter({
+      code: 'adagio',
+      adapter: adagioAnalyticsAdapter
+    });
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  describe('track adagio only', () => {
+    beforeEach(() => {
+      adapterManager.enableAnalytics({
+        provider: 'adagio',
+        options: {
+          organizationId: '1001',
+          site: 'test-com',
+          analyzeAdagioOnly: true,
+        }
+      });
+    });
+
+    afterEach(() => {
+      adagioAnalyticsAdapter.disableAnalytics();
+    });
+
+    it('builds and sends auction data', () => {
+      events.emit(EVENTS.AUCTION_INIT, MOCK.AUCTION_INIT.another);
+      events.emit(EVENTS.BID_RESPONSE, MOCK.BID_RESPONSE.adagio);
+      events.emit(EVENTS.BID_RESPONSE, MOCK.BID_RESPONSE.another);
+      events.emit(EVENTS.AUCTION_END, MOCK.AUCTION_END.another);
+      events.emit(EVENTS.BID_WON, MOCK.BID_WON.another);
+      events.emit(EVENTS.AD_RENDER_SUCCEEDED, MOCK.AD_RENDER_SUCCEEDED.another);
+
+      expect(server.requests.length).to.equal(0, 'requests count');
     });
   });
 });
