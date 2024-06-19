@@ -194,7 +194,7 @@ function handlerAuctionInit(event) {
   // Check if Adagio is on the bid requests.
   // If not, we don't need to track the auction.
   const adagioBidRequest = event.bidderRequests.find(bidRequest => isAdagio(bidRequest.bidderCode));
-  if (!adagioBidRequest) {
+  if (adagioAdapter.options.analyzeAdagioOnly && !adagioBidRequest) {
     logInfo(`Adagio is not on the bid requests for auction '${prebidAuctionId}'`)
     return;
   }
@@ -204,7 +204,7 @@ function handlerAuctionInit(event) {
   adUnitCodes.forEach(adUnitCode => {
     const adUnits = event.adUnits.filter(adUnit => adUnit.code === adUnitCode);
 
-    // Get all bidders configures for the ad unit.
+    // Get all bidders configured for the ad unit.
     const bidders = removeDuplicates(
       adUnits.map(adUnit => adUnit.bids.map(bid => ({bidder: bid.bidder, params: bid.params}))).flat(),
       bidder => bidder.bidder
@@ -213,7 +213,7 @@ function handlerAuctionInit(event) {
     // Check if Adagio is configured for the ad unit.
     // If not, we don't need to track the ad unit.
     const adagioBidder = bidders.find(bidder => isAdagio(bidder.bidder));
-    if (!adagioBidder) {
+    if (adagioAdapter.options.analyzeAdagioOnly && !adagioBidder) {
       logInfo(`Adagio is not configured for ad unit '${adUnitCode}'`);
       return;
     }
@@ -231,41 +231,45 @@ function handlerAuctionInit(event) {
       bannerSize => bannerSize
     ).sort();
 
-    // Get all Adagio bids for the ad unit from the bidRequest.
-    // If no bids, we don't need to track the ad unit.
-    const adagioAdUnitBids = adagioBidRequest.bids.filter(bid => bid.adUnitCode === adUnitCode);
-    if (deepAccess(adagioAdUnitBids, 'length', 0) <= 0) {
-      logInfo(`Adagio is not on the bid requests for ad unit '${adUnitCode}' and auction '${prebidAuctionId}'`)
-      return;
-    }
-    // Get Adagio params from the first bid.
-    // We assume that all Adagio bids for a same adunit have the same params.
-    const params = adagioAdUnitBids[0].params;
-
-    // Get all media types requested for Adagio.
-    const adagioMediaTypes = removeDuplicates(
-      adagioAdUnitBids.map(bid => Object.keys(bid.mediaTypes)).flat(),
-      mediaTypeKey => mediaTypeKey
-    ).flat().map(mediaType => getMediaTypeAlias(mediaType)).sort();
-
-    const qp = {
+    let qp = {
+      org_id: adagioAdapter.options.organizationId,
+      site: adagioAdapter.options.site,
       v: 0,
       pbjsv: PREBID_VERSION,
-      org_id: params.organizationId,
-      site: params.site,
-      pv_id: params.pageviewId,
+      pv_id: w.ADAGIO.pageviewId,
       auct_id: prebidAuctionId,
       adu_code: adUnitCode,
       url_dmn: w.location.hostname,
-      pgtyp: params.pagetype,
-      plcmt: params.placement,
-      t_n: params.testName || null,
-      t_v: params.testVersion || null,
       mts: mediaTypesKeys.join(','),
       ban_szs: bannerSizes.join(','),
       bdrs: bidders.map(bidder => bidder.bidder).sort().join(','),
-      adg_mts: adagioMediaTypes.join(',')
+      pgtyp: deepAccess(event.bidderRequests[0], 'ortb2.site.ext.data.pagetype', null),
+      plcmt: deepAccess(adUnits[0], 'ortb2Imp.ext.data.placement', null),
+      t_n: deepAccess(event.bidderRequests[0], 'ortb2.site.ext.data.adg_rtd.session.testName', null),
+      t_v: deepAccess(event.bidderRequests[0], 'ortb2.site.ext.data.adg_rtd.session.testVersion', null),
+      s_id: deepAccess(event.bidderRequests[0], 'ortb2.site.ext.data.adg_rtd.session.sessionId', null),
     };
+
+    if (adagioBidRequest && adagioBidRequest.bids) {
+      const adagioAdUnitBids = adagioBidRequest.bids.filter(bid => bid.adUnitCode === adUnitCode);
+      if (adagioAdUnitBids.length <= 0) {
+        if (adagioAdapter.options.analyzeAdagioOnly) {
+          // In analyzeAdagioOnly mode, if no bids, we don't need to track the ad unit.
+          logInfo(`Adagio is not on the bid requests for ad unit '${adUnitCode}' and auction '${prebidAuctionId}'`)
+          return;
+        }
+      } else {
+        // Get all media types requested for Adagio.
+        const adagioMediaTypes = removeDuplicates(
+          adagioAdUnitBids.map(bid => Object.keys(bid.mediaTypes)).flat(),
+          mediaTypeKey => mediaTypeKey
+        ).flat().map(mediaType => getMediaTypeAlias(mediaType)).sort();
+
+        qp = {...qp,
+          adg_mts: adagioMediaTypes.join(',')
+        };
+      }
+    }
 
     cache.auctions[prebidAuctionId][adUnitCode] = qp;
     sendNewBeacon(prebidAuctionId, adUnitCode);
@@ -418,7 +422,17 @@ adagioAdapter.enableAnalytics = adapterConfig => {
   w.ADAGIO.queue = w.ADAGIO.queue || [];
   w.ADAGIO.versions = w.ADAGIO.versions || {};
   w.ADAGIO.versions.adagioAnalyticsAdapter = VERSION;
-
+  adagioAdapter.options = adapterConfig.options || {};
+  adagioAdapter.options.analyzeAdagioOnly = typeof adagioAdapter.options.analyzeAdagioOnly === 'boolean' ? adagioAdapter.options.analyzeAdagioOnly : true;
+  if (!adagioAdapter.options.organizationId || !adagioAdapter.options.site) {
+    logError('Adagio Analytics Adapter: organizationId and site are required');
+    return;
+  }
+  adagioAdapter.options.organizationId = adagioAdapter.options.organizationId.toString(); // allows publisher to pass it as a number
+  if (typeof adagioAdapter.options.site !== 'string') {
+    logError('Adagio Analytics Adapter: site should be a string');
+    return;
+  }
   adagioAdapter.originEnableAnalytics(adapterConfig);
 }
 
