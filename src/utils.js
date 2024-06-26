@@ -41,7 +41,7 @@ export const internal = {
   createTrackPixelIframeHtml,
   getWindowSelf,
   getWindowTop,
-  getWindowLocation,
+  canAccessWindowTop,
   insertUserSyncIframe,
   insertElement,
   isFn,
@@ -620,6 +620,33 @@ export function inIframe() {
   }
 }
 
+/**
+ * https://iabtechlab.com/wp-content/uploads/2016/03/SafeFrames_v1.1_final.pdf
+ */
+export function isSafeFrameWindow() {
+  if (!inIframe()) {
+    return false;
+  }
+
+  const ws = internal.getWindowSelf();
+  return !!(ws.$sf && ws.$sf.ext);
+}
+
+/**
+ * Returns the result of calling the function $sf.ext.geom() if it exists
+ * @see https://iabtechlab.com/wp-content/uploads/2016/03/SafeFrames_v1.1_final.pdf — 5.4 Function $sf.ext.geom
+ * @returns {Object | undefined} geometric information about the container
+ */
+export function getSafeframeGeometry() {
+  try {
+    const ws = getWindowSelf();
+    return (typeof ws.$sf.ext.geom === 'function') ? ws.$sf.ext.geom() : undefined;
+  } catch (e) {
+    logError('Error getting SafeFrame geometry', e);
+    return undefined;
+  }
+}
+
 export function isSafariBrowser() {
   return /^((?!chrome|android|crios|fxios).)*safari/i.test(navigator.userAgent);
 }
@@ -650,6 +677,33 @@ export function timestamp() {
  */
 export function getPerformanceNow() {
   return (window.performance && window.performance.now && window.performance.now()) || 0;
+}
+
+/**
+ * Retuns the difference between `timing.domLoading` and `timing.navigationStart`.
+ * This function uses the deprecated `Performance.timing` API and should be removed in future.
+ * It has not been updated yet because it is still used in some modules.
+ * @deprecated
+ * @param {Window} w The window object used to perform the api call. default to window.self
+ * @returns {number}
+ */
+export function getDomLoadingDuration(w) {
+  let domLoadingDuration = -1;
+
+  w = w || getWindowSelf();
+
+  const performance = w.performance;
+
+  if (w.performance?.timing) {
+    if (w.performance.timing.navigationStart > 0) {
+      const val = performance.timing.domLoading - performance.timing.navigationStart;
+      if (val > 0) {
+        domLoadingDuration = val;
+      }
+    }
+  }
+
+  return domLoadingDuration;
 }
 
 /**
@@ -1082,4 +1136,14 @@ export function binarySearch(arr, el, key = (el) => el) {
     left++;
   }
   return left;
+}
+
+export function canAccessWindowTop() {
+  try {
+    if (internal.getWindowTop().location.href) {
+      return true;
+    }
+  } catch (e) {
+    return false;
+  }
 }
