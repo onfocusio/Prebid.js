@@ -1,5 +1,6 @@
 import { adagioRtdSubmodule, _internal, storage } from 'modules/adagioRtdProvider.js';
 import * as utils from 'src/utils.js';
+import  { config as prebidConfig} from 'src/config.js';
 import { loadExternalScript } from '../../../src/adloader.js';
 import { expect } from 'chai';
 import { getGlobal } from '../../../src/prebidGlobal.js';
@@ -275,7 +276,6 @@ describe('Adagio Rtd Provider', function () {
       const signals = bidRequest.ortb2Fragments.global.site.ext.data.adg_rtd;
       expect(signals).to.have.property('features');
       expect(signals).to.have.property('session');
-      expect(signals).to.have.property('uid');
       expect(signals.features.viewport_dimensions).to.match(/\d+x\d+/);
       expect(signals.features.page_dimensions).to.match(/\d+x\d+/);
 
@@ -482,7 +482,8 @@ describe('Adagio Rtd Provider', function () {
       'start': 1715613832796
     }
 
-    it('store a copy of computed property', function() {
+    it('store a copy of computed property when enableTIDs is active', function() {
+      prebidConfig.setConfig({enableTIDs: true});
       const spy = sandbox.spy(_internal.getAdagioNs().queue, 'push')
       sandbox.stub(Date, 'now').returns(12345);
 
@@ -527,6 +528,27 @@ describe('Adagio Rtd Provider', function () {
         ts: Date.now(),
         data: expected,
       }).calledOnce).to.be.true;
+    });
+
+    it('does not store a copy of computed property when enableTIDs is inactive', function() {
+      prebidConfig.setConfig({enableTIDs: false});
+      const spy = sandbox.spy(_internal.getAdagioNs().queue, 'push')
+      sandbox.stub(Date, 'now').returns(12345);
+
+      _internal.getGuard().clear();
+
+      const config = {
+        params: {
+          organizationId: '1000',
+          site: 'example'
+        }
+      };
+      const bidderRequestCopy = utils.deepClone(bidderRequest);
+      adagioRtdSubmodule.onBidRequestEvent(bidderRequestCopy, config);
+
+      clock.tick(1);
+
+      expect(spy.called).to.be.false;
     });
   });
 });
