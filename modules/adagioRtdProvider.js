@@ -240,10 +240,12 @@ function init(config, _userConsent) {
  * @param {*} _userConsent
  */
 function onBidRequest(bidderRequest, config, _userConsent) {
+  if (!prebidConfig.getConfig('enableTIDs')) {
+    return
+  }
   // setTimeout trick to ensure that the `bidderRequest.params` values updated by a bidder adapter are taken into account.
   // @todo: Check why we have to do it like this, and if there is a better way. Check how the event is dispatched in rtdModule/index.js
   setTimeout(() => {
-    if (!prebidConfig.getConfig('enableTIDs')) { return };
     bidderRequest.bids.forEach(bid => {
       if (!bid.auctionId) {
         logError('The `bid.auctionId` is required to store the request in the ADAGIO namespace.');
