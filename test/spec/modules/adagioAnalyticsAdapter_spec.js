@@ -660,6 +660,513 @@ const MOCK = {
   }
 };
 
+// PBS MOCK
+
+const REQUEST_PBS = {
+  bidderCode: 'rubicon',
+  auctionId: 'e4b50c47-d3d2-431e-a23a-1d346368163e',
+  bidderRequestId: '4cb200152109a1',
+  uniquePbsTid: 'abe1188c-a3eb-4ee5-87d6-7b948db50239',
+  bids: [
+    {
+      bidder: 'rubicon',
+      params: {
+        accountId: 11740,
+        siteId: 123,
+        zoneId: 456
+      },
+      bid_id: '3eaaae08cb077e8',
+      ortb2Imp: {
+        ext: {
+          data: {
+            placement: 'placement-1',
+            divId: 'div-gpt-ad-1722450005575-0',
+            adg_rtd: {
+              adunit_position: '8x117'
+            }
+          }
+        }
+      },
+      mediaTypes: {
+        banner: {
+          sizes: [
+            [
+              300,
+              250
+            ]
+          ]
+        }
+      },
+      adUnitCode: 'div-gpt-ad-1722450005575-0',
+      transactionId: '9dfa53ee-b804-47b8-936b-876ed9b4fd29',
+      adUnitId: '43474f58-d2f7-439b-bef3-8c594c0befe5',
+      sizes: [
+        [
+          300,
+          250
+        ]
+      ],
+      bidId: '3eaaae08cb077e8',
+      bidderRequestId: '4cb200152109a1',
+      auctionId: 'e4b50c47-d3d2-431e-a23a-1d346368163e',
+      src: 's2s',
+      metrics: {},
+      bidRequestsCount: 1,
+      bidderRequestsCount: 0,
+      bidderWinsCount: 0,
+      ortb2: {
+        source: {},
+        site: {
+          domain: 'elplacerdelalectura.com',
+          publisher: {
+            domain: 'elplacerdelalectura.com'
+          },
+          page: 'http://elplacerdelalectura.com/test-pages/atags-dev/pbs-atags-dev.html',
+          ref: 'http://localhost/',
+          ext: {
+            data: {
+              pagetype: 'my-pagetype',
+              category: 'my-category',
+              adg_rtd: {
+                uid: '7e061afa-857b-4de2-bd7b-afb2a183189a',
+                pageviewId: '96cccb6f-2f21-4116-b494-06211058a8ea',
+                features: {
+                  page_dimensions: '2560x687',
+                  viewport_dimensions: '2560x576',
+                  user_timestamp: '1726690329',
+                  dom_loading: '39'
+                },
+                session: {
+                  rnd: 0.34967546892102597,
+                  new: true,
+                  vwSmplg: 0.1,
+                  vwSmplgNxt: 0.1,
+                  lastActivityTime: 1726679455337,
+                  id: '6f17f81d-3ab4-414e-832d-7afa25bbce40',
+                  initiator: 'adgjs'
+                }
+              }
+            }
+          }
+        },
+        device: {
+          w: 2560,
+          h: 1440,
+          dnt: 0,
+          ua: 'Mozilla/5.0 (X11; Linux x86_64; rv:130.0) Gecko/20100101 Firefox/130.0',
+          language: 'en',
+          ext: {
+            vpw: 2560,
+            vph: 576
+          }
+        }
+      },
+      serverResponseTimeMs: 41
+    }
+  ],
+  auctionStart: 1726683129997,
+  timeout: 750,
+  src: 's2s',
+  refererInfo: {
+    reachedTop: true,
+    isAmp: false,
+    numIframes: 0,
+    stack: [
+      'http://elplacerdelalectura.com/test-pages/atags-dev/pbs-atags-dev.html'
+    ],
+    topmostLocation: 'http://elplacerdelalectura.com/test-pages/atags-dev/pbs-atags-dev.html',
+    location: 'http://elplacerdelalectura.com/test-pages/atags-dev/pbs-atags-dev.html',
+    canonicalUrl: null,
+    page: 'http://elplacerdelalectura.com/test-pages/atags-dev/pbs-atags-dev.html',
+    domain: 'elplacerdelalectura.com',
+    ref: 'http://localhost/',
+    legacy: {
+      reachedTop: true,
+      isAmp: false,
+      numIframes: 0,
+      stack: [
+        'http://elplacerdelalectura.com/test-pages/atags-dev/pbs-atags-dev.html'
+      ],
+      referer: 'http://elplacerdelalectura.com/test-pages/atags-dev/pbs-atags-dev.html',
+      canonicalUrl: null
+    }
+  },
+  metrics: {},
+  ortb2: {
+    source: {},
+    site: {
+      domain: 'elplacerdelalectura.com',
+      publisher: {
+        domain: 'elplacerdelalectura.com'
+      },
+      page: 'http://elplacerdelalectura.com/test-pages/atags-dev/pbs-atags-dev.html',
+      ref: 'http://localhost/',
+      ext: {
+        data: {
+          pagetype: 'my-pagetype',
+          category: 'my-category',
+          adg_rtd: {
+            uid: '7e061afa-857b-4de2-bd7b-afb2a183189a',
+            pageviewId: '96cccb6f-2f21-4116-b494-06211058a8ea',
+            features: {
+              page_dimensions: '2560x687',
+              viewport_dimensions: '2560x576',
+              user_timestamp: '1726690329',
+              dom_loading: '39'
+            },
+            session: {
+              rnd: 0.34967546892102597,
+              new: true,
+              vwSmplg: 0.1,
+              vwSmplgNxt: 0.1,
+              lastActivityTime: 1726679455337,
+              id: '6f17f81d-3ab4-414e-832d-7afa25bbce40',
+              initiator: 'adgjs'
+            }
+          }
+        }
+      }
+    },
+    device: {
+      w: 2560,
+      h: 1440,
+      dnt: 0,
+      ua: 'Mozilla/5.0 (X11; Linux x86_64; rv:130.0) Gecko/20100101 Firefox/130.0',
+      language: 'en',
+      ext: {
+        vpw: 2560,
+        vph: 576
+      }
+    }
+  },
+  adUnitsS2SCopy: [
+    {
+      code: 'div-gpt-ad-1722450005575-0',
+      mediaTypes: {
+        banner: {
+          sizes: [
+            [
+              300,
+              250
+            ]
+          ]
+        }
+      },
+      bids: [
+        {
+          bidder: 'rubicon',
+          params: {
+            accountId: 11740,
+            siteId: 123,
+            zoneId: 456
+          },
+          bid_id: '3eaaae08cb077e8'
+        }
+      ],
+      ortb2Imp: {
+        ext: {
+          data: {
+            placement: 'placement-1',
+            divId: 'div-gpt-ad-1722450005575-0',
+            adg_rtd: {
+              adunit_position: '8x117'
+            }
+          },
+          tid: '9dfa53ee-b804-47b8-936b-876ed9b4fd29'
+        }
+      },
+      sizes: [
+        [
+          300,
+          250
+        ]
+      ],
+      adUnitId: '43474f58-d2f7-439b-bef3-8c594c0befe5',
+      transactionId: '9dfa53ee-b804-47b8-936b-876ed9b4fd29'
+    }
+  ],
+  start: 1726683129998,
+  serverResponseTimeMs: 41
+}
+
+const BID_PBS = {
+  bidderCode: 'rubicon',
+  width: 300,
+  height: 250,
+  statusMessage: 'Bid available',
+  adId: '685eef8a90d32e8',
+  requestId: '3eaaae08cb077e8',
+  transactionId: '9dfa53ee-b804-47b8-936b-876ed9b4fd29',
+  adUnitId: '43474f58-d2f7-439b-bef3-8c594c0befe5',
+  auctionId: 'e4b50c47-d3d2-431e-a23a-1d346368163e',
+  mediaType: 'banner',
+  source: 's2s',
+  ad: 'AdMarkup ...',
+  seatBidId: '1234567890',
+  cpm: 1.594,
+  currency: 'USD',
+  creative_id: 'creative111',
+  creativeId: 'creative111',
+  ttl: 60,
+  netRevenue: true,
+  meta: {
+    adaptercode: 'rubicon',
+    advertiserDomains: [
+      'www.addomain.com'
+    ]
+  },
+  adapterCode: 'rubicon',
+  pbsBidId: '91ee57df-4895-4bec-a006-7d1798443186',
+  adserverTargeting: {
+    hb_bidder: 'rubicon',
+    hb_pb: '1.50',
+    hb_size: '300x250',
+    hb_adid: '685eef8a90d32e8',
+    hb_source: 's2s',
+    hb_format: 'banner',
+    hb_adomain: 'www.addomain.com',
+    hb_crid: 'creative111'
+  },
+  requestBidder: 'rubicon',
+  requestTimestamp: 1726683129999,
+  metrics: {},
+  responseTimestamp: 1726683130042,
+  bidder: 'rubicon',
+  adUnitCode: 'div-gpt-ad-1722450005575-0',
+  timeToRespond: 43,
+  pbLg: '1.50',
+  pbMg: '1.50',
+  pbHg: '1.59',
+  pbAg: '1.55',
+  pbDg: '1.59',
+  pbCg: '',
+  size: '300x250',
+  latestTargetedAuctionId: 'e4b50c47-d3d2-431e-a23a-1d346368163e',
+  status: 'rendered',
+  params: [
+    {
+      accountId: 11740,
+      siteId: 123,
+      zoneId: 456
+    }
+  ]
+}
+
+const ADUNIT_PBS = {
+  code: 'div-gpt-ad-1722450005575-0',
+  mediaTypes: {
+    banner: {
+      sizes: [
+        [
+          300,
+          250
+        ]
+      ]
+    }
+  },
+  bids: [
+    {
+      bidder: 'rubicon',
+      params: {
+        accountId: 11740,
+        siteId: 123,
+        zoneId: 456
+      }
+    }
+  ],
+  ortb2Imp: {
+    ext: {
+      data: {
+        placement: 'placement-1',
+        divId: 'div-gpt-ad-1722450005575-0',
+        adg_rtd: {
+          adunit_position: '8x117'
+        }
+      },
+      tid: '9dfa53ee-b804-47b8-936b-876ed9b4fd29'
+    }
+  },
+  sizes: [
+    [
+      300,
+      250
+    ]
+  ],
+  adUnitId: '43474f58-d2f7-439b-bef3-8c594c0befe5',
+  transactionId: '9dfa53ee-b804-47b8-936b-876ed9b4fd29'
+}
+
+const PBS_AUCTION_MOCK = {
+  auction_init: {
+    auctionId: 'e4b50c47-d3d2-431e-a23a-1d346368163e',
+    timestamp: 1726683129997,
+    auctionStatus: 'inProgress',
+    adUnits: [ADUNIT_PBS],
+    adUnitCodes: [
+      'div-gpt-ad-1722450005575-0'
+    ],
+    bidderRequests: [REQUEST_PBS],
+    noBids: [],
+    bidsReceived: [],
+    bidsRejected: [],
+    winningBids: [],
+    timeout: 1000,
+    metrics: {},
+    seatNonBids: []
+  },
+  bid_response: BID_PBS,
+  pbs_analytics: {
+    atag: [
+      {
+        stage: 'auction-response',
+        module: 'adg-pba',
+        pba: {
+          'div-gpt-ad-1722450005575-0': {
+            st_id: '53',
+            splt_cs_id: '731'
+          }
+        }
+      }
+    ],
+    auctionId: 'e4b50c47-d3d2-431e-a23a-1d346368163e',
+    requestedBidders: [
+      'rubicon'
+    ],
+    response: BID_PBS,
+    adapterMetrics: {}
+  },
+  auction_end: {
+    auctionId: 'e4b50c47-d3d2-431e-a23a-1d346368163e',
+    timestamp: 1726683129997,
+    auctionEnd: 1726683130043,
+    auctionStatus: 'completed',
+    adUnits: [ADUNIT_PBS],
+    adUnitCodes: [
+      'div-gpt-ad-1722450005575-0'
+    ],
+    bidderRequests: [REQUEST_PBS],
+    noBids: [],
+    bidsReceived: [BID_PBS],
+    bidsRejected: [],
+    winningBids: [],
+    timeout: 1000,
+    metrics: {},
+    seatNonBids: []
+  },
+  bid_won: BID_PBS
+}
+
+/*
+PBA beacons corresponding to the PBS fixtures.
+
+ {
+	"GET": {
+		"scheme": "https",
+		"host": "c.4dex.io",
+		"filename": "/pba.gif",
+		"query": {
+			"org_id": "1015",
+			"site": "62739-elplacerdelalectura-com",
+			"v": "1",
+			"pbjsv": "9.14.0-pre",
+			"pv_id": "96cccb6f-2f21-4116-b494-06211058a8ea",
+			"auct_id": "7e061afa-857b-4de2-bd7b-afb2a183189a",
+			"adu_code": "div-gpt-ad-1722450005575-0",
+			"url_dmn": "elplacerdelalectura.com",
+			"mts": "ban",
+			"ban_szs": "300x250",
+			"bdrs": "rubicon",
+			"pgtyp": "my-pagetype",
+			"plcmt": "placement-1",
+			"s_id": "6f17f81d-3ab4-414e-832d-7afa25bbce40",
+			"s_new": "true",
+			"bdrs_src": "s2s",
+			"bdrs_code": "rubicon"
+		},
+		"remote": {
+			"Address": "35.241.34.106:443"
+		}
+	}
+}
+
+ {
+	"GET": {
+		"scheme": "https",
+		"host": "c.4dex.io",
+		"filename": "/pba.gif",
+		"query": {
+			"org_id": "1015",
+			"site": "62739-elplacerdelalectura-com",
+			"v": "2",
+			"pbjsv": "9.14.0-pre",
+			"pv_id": "96cccb6f-2f21-4116-b494-06211058a8ea",
+			"auct_id": "7e061afa-857b-4de2-bd7b-afb2a183189a",
+			"adu_code": "div-gpt-ad-1722450005575-0",
+			"url_dmn": "elplacerdelalectura.com",
+			"mts": "ban",
+			"ban_szs": "300x250",
+			"bdrs": "rubicon",
+			"pgtyp": "my-pagetype",
+			"plcmt": "placement-1",
+			"s_id": "6f17f81d-3ab4-414e-832d-7afa25bbce40",
+			"s_new": "true",
+			"bdrs_src": "s2s",
+			"bdrs_code": "rubicon",
+			"e_st_id": "53",
+			"e_splt_cs_id": "731",
+			"bdrs_bid": "1",
+			"bdrs_cpm": "1.594",
+			"dom_i": "173"
+		},
+		"remote": {
+			"Address": "35.241.34.106:443"
+		}
+	}
+}
+
+ {
+	"GET": {
+		"scheme": "https",
+		"host": "c.4dex.io",
+		"filename": "/pba.gif",
+		"query": {
+			"org_id": "1015",
+			"site": "62739-elplacerdelalectura-com",
+			"v": "3",
+			"pbjsv": "9.14.0-pre",
+			"pv_id": "96cccb6f-2f21-4116-b494-06211058a8ea",
+			"auct_id": "7e061afa-857b-4de2-bd7b-afb2a183189a",
+			"adu_code": "div-gpt-ad-1722450005575-0",
+			"url_dmn": "elplacerdelalectura.com",
+			"mts": "ban",
+			"ban_szs": "300x250",
+			"bdrs": "rubicon",
+			"pgtyp": "my-pagetype",
+			"plcmt": "placement-1",
+			"s_id": "6f17f81d-3ab4-414e-832d-7afa25bbce40",
+			"s_new": "true",
+			"bdrs_src": "s2s",
+			"bdrs_code": "rubicon",
+			"e_st_id": "53",
+			"e_splt_cs_id": "731",
+			"bdrs_bid": "1",
+			"bdrs_cpm": "1.594",
+			"dom_i": "173",
+			"dom_c": "2050",
+			"loa_e": "2051",
+			"win_bdr": "rubicon",
+			"win_mt": "ban",
+			"win_ban_sz": "300x250",
+			"win_net_cpm": "1.594",
+			"win_og_cpm": "undefined"
+		},
+		"remote": {
+			"Address": "35.241.34.106:443"
+		}
+	}
+}
+*/
+
 describe('adagio analytics adapter', () => {
   let sandbox;
 
@@ -970,6 +1477,44 @@ describe('adagio analytics adapter', () => {
         expect(search.e_pba_test).to.equal('true');
         expect(search.bdrs_bid).to.equal('1,1,0,0');
         expect(search.bdrs_cpm).to.equal('1.42,,,');
+      }
+    });
+
+    it('builds and sends PBS auction data', () => {
+      events.emit(EVENTS.AUCTION_INIT, PBS_AUCTION_MOCK.auction_init);
+      events.emit(EVENTS.BID_RESPONSE, PBS_AUCTION_MOCK.bid_response);
+      events.emit(EVENTS.PBS_ANALYTICS, PBS_AUCTION_MOCK.pbs_analytics);
+      events.emit(EVENTS.AUCTION_END, PBS_AUCTION_MOCK.auction_end);
+      events.emit(EVENTS.BID_WON, PBS_AUCTION_MOCK.bid_won);
+
+      expect(server.requests.length).to.equal(3, 'requests count');
+      {
+        const { protocol, hostname, pathname, search } = utils.parseUrl(server.requests[0].url);
+        expect(protocol).to.equal('https');
+        expect(hostname).to.equal('c.4dex.io');
+        expect(pathname).to.equal('/pba.gif');
+
+        expect(search.v).to.equal('1');
+        expect(search.e_st_id).to.be.undefined;
+        expect(search.e_splt_cs_id).to.be.undefined;
+      }
+
+      {
+        const { search } = utils.parseUrl(server.requests[1].url);
+
+        expect(search.v).to.equal('2');
+
+        expect(search.e_st_id).to.equal('53');
+        expect(search.e_splt_cs_id).to.equal('731');
+      }
+
+      {
+        const { search } = utils.parseUrl(server.requests[2].url);
+
+        expect(search.v).to.equal('3');
+
+        expect(search.e_st_id).to.equal('53');
+        expect(search.e_splt_cs_id).to.equal('731');
       }
     });
   });
