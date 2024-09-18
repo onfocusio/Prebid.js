@@ -250,7 +250,6 @@ function handlerAuctionInit(event) {
       s_new: adgRtdSession.new || null,
       bdrs_src: biddersSrc,
       bdrs_code: biddersCode,
-      st_id: null, // Adagio seat id.
     };
 
     if (adagioBidRequest && adagioBidRequest.bids) {
@@ -385,18 +384,18 @@ function handlerPbsAnalytics(event) {
   console.log('-> handlerPbsAnalytics: (event)', event); // TODO: CONSOLE LOG !
 
   // TODO: Also handle `SplitCaseId` from atag.
-  const seatByAdUnitCode = event.atag.find(e => {
+  const pbaByAdUnit = event.atag.find(e => {
     return e.module === 'adg-win-seat-id'
-  })?.seats;
+  })?.pba;
 
-  if (seatByAdUnitCode == null) {
+  if (pbaByAdUnit == null) {
     // eslint-disable-next-line no-console
     console.log('-> HANDLER_PBS_ANALYTICS: WIN_SEAT_ID_EVENT NOT FOUND !!!'); // TODO: CONSOLE LOG !
     return;
   }
 
   // eslint-disable-next-line no-console
-  console.log('-> seatByAdUnitCode == ', seatByAdUnitCode); // TODO: CONSOLE LOG !
+  console.log('-> pbaByAdUnit == ', pbaByAdUnit); // TODO: CONSOLE LOG !
 
   const { auctionId } = event;
   const adUnitCodes = cache.getAllAdUnitCodes(auctionId);
@@ -404,12 +403,11 @@ function handlerPbsAnalytics(event) {
   // eslint-disable-next-line no-console
   console.log('-> adUnitCodes == ', adUnitCodes); // TODO: CONSOLE LOG !
 
-  // TODO: Check if it works correctly if we received multiple objects in `seatbid` array (bidResponse payload)
   adUnitCodes.forEach(adUnitCode => {
-    const seatId = seatByAdUnitCode[adUnitCode]
-    if (seatId != null) {
+    const pba = pbaByAdUnit[adUnitCode]
+    if (pba != null) {
       cache.updateAuction(auctionId, adUnitCode, {
-        st_id: seatId,
+        ...pba,
       })
     }
   })
