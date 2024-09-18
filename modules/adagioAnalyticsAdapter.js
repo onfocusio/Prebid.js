@@ -378,36 +378,25 @@ function handlerAdRender(event, isSuccess) {
   sendNewBeacon(auctionId, adUnitCode);
 };
 
-// TODO: Add unit tests.
 /**
- * handlerPbsAnalytics add data to the cache coming from Adagio PBS AdResponse.
+ * handlerPbsAnalytics add data coming from Adagio PBS AdResponse to the cache.
  * Data coming from PBS AdResponse field `response.ext.prebid.analytics.tags[].pba`
  * (data added by an internal custom PBS "module" named `adg-pba`).
  */
 function handlerPbsAnalytics(event) {
-  // eslint-disable-next-line no-console
-  console.log('-> handlerPbsAnalytics: (event)', event); // TODO: CONSOLE LOG !
-
   const pbaByAdUnit = event.atag.find(e => {
     return e.module === 'adg-pba'
   })?.pba;
 
-  // eslint-disable-next-line no-console
-  console.log('-> pbaByAdUnit == ', pbaByAdUnit); // TODO: CONSOLE LOG !
-
   if (!pbaByAdUnit) {
-    // eslint-disable-next-line no-console
-    console.log('-> HANDLER_PBS_ANALYTICS: WIN_SEAT_ID_EVENT NOT FOUND !!!'); // TODO: CONSOLE LOG !
     return;
   }
 
   const adUnitCodes = cache.getAllAdUnitCodes(event.auctionId);
 
-  // eslint-disable-next-line no-console
-  console.log('-> adUnitCodes == ', adUnitCodes); // TODO: CONSOLE LOG !
-
   adUnitCodes.forEach(adUnitCode => {
     const pba = pbaByAdUnit[adUnitCode]
+
     if (isPlainObject(pba)) {
       cache.updateAuction(event.auctionId, adUnitCode, {
         ...addKeyPrefix(pba, 'e_')
