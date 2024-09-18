@@ -405,7 +405,7 @@ function handlerPbsAnalytics(event) {
 
   adUnitCodes.forEach(adUnitCode => {
     const pba = pbaByAdUnit[adUnitCode]
-    if (pba != null) {
+    if (isPlainObject(pba)) {
       cache.updateAuction(auctionId, adUnitCode, {
         ...pba,
       })
@@ -441,7 +441,8 @@ let adagioAdapter = Object.assign(adapter({ emptyUrl, analyticsType }), {
           handlerAdRender(args, eventType === EVENTS.AD_RENDER_SUCCEEDED);
           break;
         case EVENTS.PBS_ANALYTICS:
-          handlerPbsAnalytics(args)
+          handlerPbsAnalytics(args);
+          break;
       }
     } catch (error) {
       logError('Error on Adagio Analytics Adapter', error);
