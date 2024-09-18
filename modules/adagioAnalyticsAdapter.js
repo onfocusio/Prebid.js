@@ -3,7 +3,7 @@
  */
 
 import { _ADAGIO, getBestWindowForAdagio } from '../libraries/adagioUtils/adagioUtils.js';
-import { deepAccess, logError, logInfo, logWarn } from '../src/utils.js';
+import { deepAccess, logError, logInfo, logWarn, isPlainObject } from '../src/utils.js';
 import { BANNER } from '../src/mediaTypes.js';
 import { EVENTS } from '../src/constants.js';
 import adapter from '../libraries/analyticsAdapter/AnalyticsAdapter.js';
@@ -379,26 +379,29 @@ function handlerAdRender(event, isSuccess) {
 };
 
 // TODO: Add unit tests.
+/**
+ * handlerPbsAnalytics add data to the cache coming from Adagio PBS AdResponse.
+ * Data coming from PBS AdResponse field `response.ext.prebid.analytics.tags[].pba`
+ * (data added by an internal custom PBS "module" named `adg-pba`).
+ */
 function handlerPbsAnalytics(event) {
   // eslint-disable-next-line no-console
   console.log('-> handlerPbsAnalytics: (event)', event); // TODO: CONSOLE LOG !
 
-  // TODO: Also handle `SplitCaseId` from atag.
   const pbaByAdUnit = event.atag.find(e => {
-    return e.module === 'adg-win-seat-id'
+    return e.module === 'adg-pba'
   })?.pba;
 
-  if (pbaByAdUnit == null) {
+  // eslint-disable-next-line no-console
+  console.log('-> pbaByAdUnit == ', pbaByAdUnit); // TODO: CONSOLE LOG !
+
+  if (!pbaByAdUnit) {
     // eslint-disable-next-line no-console
     console.log('-> HANDLER_PBS_ANALYTICS: WIN_SEAT_ID_EVENT NOT FOUND !!!'); // TODO: CONSOLE LOG !
     return;
   }
 
-  // eslint-disable-next-line no-console
-  console.log('-> pbaByAdUnit == ', pbaByAdUnit); // TODO: CONSOLE LOG !
-
-  const { auctionId } = event;
-  const adUnitCodes = cache.getAllAdUnitCodes(auctionId);
+  const adUnitCodes = cache.getAllAdUnitCodes(event.auctionId);
 
   // eslint-disable-next-line no-console
   console.log('-> adUnitCodes == ', adUnitCodes); // TODO: CONSOLE LOG !
@@ -406,9 +409,9 @@ function handlerPbsAnalytics(event) {
   adUnitCodes.forEach(adUnitCode => {
     const pba = pbaByAdUnit[adUnitCode]
     if (isPlainObject(pba)) {
-      cache.updateAuction(auctionId, adUnitCode, {
-        ...pba,
-      })
+      cache.updateAuction(event.auctionId, adUnitCode, {
+        ...addKeyPrefix(pba, 'e_')
+      });
     }
   })
 }
