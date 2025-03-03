@@ -14,9 +14,7 @@ import { subscribeToGamSlotRenderEndedEvent, SlotRenderEndedEvent } from '../lib
 
 const emptyUrl = '';
 const analyticsType = 'endpoint';
-const events = Object.keys(EVENTS).map(key => EVENTS[key]);
 const ADAGIO_GVLID = 617;
-const VERSION = '3.0.0';
 const PREBID_VERSION = '$prebid.version$';
 const ENDPOINT = 'https://c.4dex.io/pba.gif';
 const CURRENCY_USD = 'USD';
@@ -515,26 +513,12 @@ let adagioAdapter = Object.assign(adapter({ emptyUrl, analyticsType }), {
     } catch (error) {
       logError('Error on Adagio Analytics Adapter', error);
     }
-
-    try {
-      if (typeof args !== 'undefined' && events.indexOf(eventType) !== -1) {
-        _internal.getAdagioNs().queue.push({
-          action: 'pb-analytics-event',
-          data: { eventName: eventType, args },
-          ts: Date.now()
-        });
-      }
-    } catch (error) {
-      logError('Error on Adagio Analytics Adapter - adagio.js', error);
-    }
   }
 });
 
 adagioAdapter.originEnableAnalytics = adagioAdapter.enableAnalytics;
 
 adagioAdapter.enableAnalytics = config => {
-  _internal.getAdagioNs().versions.adagioAnalyticsAdapter = VERSION;
-
   let modules = getGlobal().installedModules;
   if (modules && (!modules.length || modules.indexOf('adagioRtdProvider') === -1 || modules.indexOf('rtdModule') === -1)) {
     logError('Adagio Analytics Adapter requires rtdModule & adagioRtdProvider modules which are not installed. No beacon will be sent');
