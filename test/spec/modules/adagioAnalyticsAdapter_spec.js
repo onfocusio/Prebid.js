@@ -806,7 +806,7 @@ describe('adagio analytics adapter', () => {
       {
         const { protocol, hostname, pathname, search } = utils.parseUrl(server.requests[0].url);
         expect(protocol).to.equal('https');
-        expect(hostname).to.equal('c.4dex.io');
+        expect(hostname).to.equal('c.4dex.tech');
         expect(pathname).to.equal('/pba.gif');
         expect(search.v).to.equal('1');
         expect(search.pbjsv).to.equal('$prebid.version$');
@@ -830,7 +830,7 @@ describe('adagio analytics adapter', () => {
       {
         const { protocol, hostname, pathname, search } = utils.parseUrl(server.requests[1].url);
         expect(protocol).to.equal('https');
-        expect(hostname).to.equal('c.4dex.io');
+        expect(hostname).to.equal('c.4dex.tech');
         expect(pathname).to.equal('/pba.gif');
         expect(search.v).to.equal('1');
       }
@@ -838,7 +838,7 @@ describe('adagio analytics adapter', () => {
       {
         const { protocol, hostname, pathname, search } = utils.parseUrl(server.requests[2].url);
         expect(protocol).to.equal('https');
-        expect(hostname).to.equal('c.4dex.io');
+        expect(hostname).to.equal('c.4dex.tech');
         expect(pathname).to.equal('/pba.gif');
         expect(search.v).to.equal('2');
         expect(search.adu_code).to.equal('/19968336/header-bid-tag-1');
@@ -852,7 +852,7 @@ describe('adagio analytics adapter', () => {
       {
         const { protocol, hostname, pathname, search } = utils.parseUrl(server.requests[3].url);
         expect(protocol).to.equal('https');
-        expect(hostname).to.equal('c.4dex.io');
+        expect(hostname).to.equal('c.4dex.tech');
         expect(pathname).to.equal('/pba.gif');
         expect(search.v).to.equal('2');
         expect(search.auct_id).to.equal(RTD_AUCTION_ID);
@@ -863,7 +863,7 @@ describe('adagio analytics adapter', () => {
       {
         const { protocol, hostname, pathname, search } = utils.parseUrl(server.requests[4].url);
         expect(protocol).to.equal('https');
-        expect(hostname).to.equal('c.4dex.io');
+        expect(hostname).to.equal('c.4dex.tech');
         expect(pathname).to.equal('/pba.gif');
         expect(search.v).to.equal('3');
         expect(search.auct_id).to.equal(RTD_AUCTION_ID);
@@ -891,7 +891,7 @@ describe('adagio analytics adapter', () => {
         // the first request is getting cached we expect to see its auction id later when it's re-used
         const { protocol, hostname, pathname, search } = utils.parseUrl(server.requests[0].url);
         expect(protocol).to.equal('https');
-        expect(hostname).to.equal('c.4dex.io');
+        expect(hostname).to.equal('c.4dex.tech');
         expect(pathname).to.equal('/pba.gif');
         expect(search.v).to.equal('1');
         expect(search.pbjsv).to.equal('$prebid.version$');
@@ -917,7 +917,7 @@ describe('adagio analytics adapter', () => {
       {
         const { protocol, hostname, pathname, search } = utils.parseUrl(server.requests[1].url);
         expect(protocol).to.equal('https');
-        expect(hostname).to.equal('c.4dex.io');
+        expect(hostname).to.equal('c.4dex.tech');
         expect(pathname).to.equal('/pba.gif');
         expect(search.v).to.equal('1');
         expect(search.pbjsv).to.equal('$prebid.version$');
@@ -940,7 +940,7 @@ describe('adagio analytics adapter', () => {
       {
         const { protocol, hostname, pathname, search } = utils.parseUrl(server.requests[2].url);
         expect(protocol).to.equal('https');
-        expect(hostname).to.equal('c.4dex.io');
+        expect(hostname).to.equal('c.4dex.tech');
         expect(pathname).to.equal('/pba.gif');
         expect(search.v).to.equal('1');
         expect(search.pbjsv).to.equal('$prebid.version$');
@@ -963,7 +963,7 @@ describe('adagio analytics adapter', () => {
       {
         const { protocol, hostname, pathname, search } = utils.parseUrl(server.requests[3].url);
         expect(protocol).to.equal('https');
-        expect(hostname).to.equal('c.4dex.io');
+        expect(hostname).to.equal('c.4dex.tech');
         expect(pathname).to.equal('/pba.gif');
         expect(search.v).to.equal('1');
         expect(search.auct_id).to.equal(RTD_AUCTION_ID);
@@ -975,7 +975,7 @@ describe('adagio analytics adapter', () => {
       {
         const { protocol, hostname, pathname, search } = utils.parseUrl(server.requests[4].url);
         expect(protocol).to.equal('https');
-        expect(hostname).to.equal('c.4dex.io');
+        expect(hostname).to.equal('c.4dex.tech');
         expect(pathname).to.equal('/pba.gif');
         expect(search.v).to.equal('2');
         expect(search.auct_id).to.equal(RTD_AUCTION_ID);
@@ -990,7 +990,7 @@ describe('adagio analytics adapter', () => {
       {
         const { protocol, hostname, pathname, search } = utils.parseUrl(server.requests[5].url);
         expect(protocol).to.equal('https');
-        expect(hostname).to.equal('c.4dex.io');
+        expect(hostname).to.equal('c.4dex.tech');
         expect(pathname).to.equal('/pba.gif');
         expect(search.v).to.equal('2');
         expect(search.auct_id).to.equal(RTD_AUCTION_ID);
@@ -1002,7 +1002,7 @@ describe('adagio analytics adapter', () => {
       {
         const { protocol, hostname, pathname, search } = utils.parseUrl(server.requests[6].url);
         expect(protocol).to.equal('https');
-        expect(hostname).to.equal('c.4dex.io');
+        expect(hostname).to.equal('c.4dex.tech');
         expect(pathname).to.equal('/pba.gif');
         expect(search.v).to.equal('3');
         expect(search.auct_id).to.equal(RTD_AUCTION_ID);
@@ -1020,7 +1020,7 @@ describe('adagio analytics adapter', () => {
       {
         const { protocol, hostname, pathname, search } = utils.parseUrl(server.requests[7].url);
         expect(protocol).to.equal('https');
-        expect(hostname).to.equal('c.4dex.io');
+        expect(hostname).to.equal('c.4dex.tech');
         expect(pathname).to.equal('/pba.gif');
         expect(search.v).to.equal('4');
         expect(search.auct_id).to.equal(RTD_AUCTION_ID);
@@ -1055,7 +1055,7 @@ describe('adagio analytics adapter', () => {
       {
         const { protocol, hostname, pathname, search } = utils.parseUrl(server.requests[2].url);
         expect(protocol).to.equal('https');
-        expect(hostname).to.equal('c.4dex.io');
+        expect(hostname).to.equal('c.4dex.tech');
         expect(pathname).to.equal('/pba.gif');
         expect(search.s_id).to.equal(SESSION_ID);
         expect(search.v).to.equal('2');
@@ -1130,7 +1130,7 @@ describe('adagio analytics adapter', () => {
       {
         const { protocol, hostname, pathname, search } = utils.parseUrl(server.requests[0].url);
         expect(protocol).to.equal('https');
-        expect(hostname).to.equal('c.4dex.io');
+        expect(hostname).to.equal('c.4dex.tech');
         expect(pathname).to.equal('/pba.gif');
         expect(search.v).to.equal('1');
         expect(search.bdrs_timeout).to.not.exist;
@@ -1138,7 +1138,7 @@ describe('adagio analytics adapter', () => {
       {
         const { protocol, hostname, pathname, search } = utils.parseUrl(server.requests[1].url);
         expect(protocol).to.equal('https');
-        expect(hostname).to.equal('c.4dex.io');
+        expect(hostname).to.equal('c.4dex.tech');
         expect(pathname).to.equal('/pba.gif');
         expect(search.v).to.equal('1');
         expect(search.bdrs_timeout).to.not.exist;
@@ -1146,7 +1146,7 @@ describe('adagio analytics adapter', () => {
       {
         const { protocol, hostname, pathname, search } = utils.parseUrl(server.requests[2].url);
         expect(protocol).to.equal('https');
-        expect(hostname).to.equal('c.4dex.io');
+        expect(hostname).to.equal('c.4dex.tech');
         expect(pathname).to.equal('/pba.gif');
         expect(search.v).to.equal('2');
         expect(search.bdrs).to.equal('adagio,another,anotherWithAlias,nobid');
@@ -1155,7 +1155,7 @@ describe('adagio analytics adapter', () => {
       {
         const { protocol, hostname, pathname, search } = utils.parseUrl(server.requests[3].url);
         expect(protocol).to.equal('https');
-        expect(hostname).to.equal('c.4dex.io');
+        expect(hostname).to.equal('c.4dex.tech');
         expect(pathname).to.equal('/pba.gif');
         expect(search.v).to.equal('2');
         expect(search.bdrs).to.equal('another');
