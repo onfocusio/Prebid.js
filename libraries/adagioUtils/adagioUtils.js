@@ -31,5 +31,10 @@ export const _ADAGIO = (function() {
   w.ADAGIO.windows = w.ADAGIO.windows || [];
   w.ADAGIO.isSafeFrameWindow = isSafeFrameWindow();
 
+  w.ADAGIO.hasRtd = w.ADAGIO.hasRtd || {};
+  if (w.ADAGIO.hasRtd['$prebid.version$'] === undefined) {
+    w.ADAGIO.hasRtd['$prebid.version$'] = false
+  }
+
   return w.ADAGIO;
 })();

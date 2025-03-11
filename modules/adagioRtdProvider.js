@@ -264,7 +264,7 @@ function init(config, _userConsent) {
     return false;
   }
 
-  _internal.getAdagioNs().hasRtd = true;
+  _internal.getAdagioNs().hasRtd['$prebid.version$'] = true;
 
   _internal.getSession().init();
 
