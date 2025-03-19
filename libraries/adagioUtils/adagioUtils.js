@@ -30,6 +30,7 @@ export const _ADAGIO = (function() {
   w.ADAGIO.versions.pbjs = '$prebid.version$';
   w.ADAGIO.windows = w.ADAGIO.windows || [];
   w.ADAGIO.isSafeFrameWindow = isSafeFrameWindow();
+  w.ADAGIO.registeredEvents = w.ADAGIO.registeredEvents || [];
 
   return w.ADAGIO;
 })();
