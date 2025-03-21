@@ -511,6 +511,7 @@ export const spec = {
     return true;
   },
 
+  // TODO: We may need to update our public Adapter docs for Native configuration https://docs.prebid.org/dev-docs/bidders/adagio.html
   buildRequests(validBidRequests, bidderRequest) {
     console.log('---DEV---> NEW ORTB VERSION!')
     // convert Native ORTB definition to old-style prebid native definition
