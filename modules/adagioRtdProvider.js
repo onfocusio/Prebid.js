@@ -37,7 +37,7 @@ import { getBoundingClientRect } from '../libraries/boundingClientRect/boundingC
 const SUBMODULE_NAME = 'adagio';
 const ADAGIO_BIDDER_CODE = 'adagio';
 const GVLID = 617;
-const SCRIPT_URL = 'https://script.4dex.io/a/latest/adagio.js';
+const SCRIPT_URL = 'http://localhost/lib/adagio.js';
 const LATEST_ABTEST_VERSION = 2;
 export const PLACEMENT_SOURCES = {
   ORTB: 'ortb', // implicit default, not used atm.
