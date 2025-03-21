@@ -28,7 +28,7 @@ import { userSync } from '../src/userSync.js';
 
 const BIDDER_CODE = 'adagio';
 const LOG_PREFIX = 'Adagio:';
-export const ENDPOINT = 'https://mp.4dex.io/prebid';
+export const ENDPOINT = 'http://localhost:9080/prebid';
 const SUPPORTED_MEDIA_TYPES = [BANNER, NATIVE, VIDEO];
 const GVLID = 617;
 
@@ -512,8 +512,12 @@ export const spec = {
   },
 
   buildRequests(validBidRequests, bidderRequest) {
+    console.log('---DEV---> NEW ORTB VERSION!')
     // convert Native ORTB definition to old-style prebid native definition
-    validBidRequests = convertOrtbRequestToProprietaryNative(validBidRequests);
+
+    console.log('---DEV--- : Before convertion = ', JSON.stringify(validBidRequests))
+    // validBidRequests = convertOrtbRequestToProprietaryNative(validBidRequests); // TODO: Remove the convertion to send the ORTB Native object. Should follow spec https://github.com/InteractiveAdvertisingBureau/Native-Ads/blob/main/OpenRTB-Native-Ads-Specification-Final-1.2.md#41-object-native-markup-request
+    // console.log('---DEV--- : After convertion = ', JSON.stringify(validBidRequests))
 
     const secure = (location.protocol === 'https:') ? 1 : 0;
     const device = _internal.getDevice(bidderRequest?.ortb2);
@@ -665,7 +669,7 @@ export const spec = {
         features: bidRequest.features,
         gpid: bidRequest.gpid,
         mediaTypes: bidRequest.mediaTypes,
-        nativeParams: bidRequest.nativeParams,
+        // nativeParams: bidRequest.nativeParams, // TODO: Remove to stop sending dulicate Native payload.
         score: bidRequest.score,
         transactionId: bidRequest.transactionId,
       }
@@ -774,7 +778,7 @@ export const spec = {
               }
 
               if (bidObj.mediaType === NATIVE) {
-                _parseNativeBidResponse(bidObj);
+                _parseNativeBidResponse(bidObj); // TODO: We may need to replace this function call, by setting the native info to the corresponding path.
               }
 
               bidObj.site = bidReq.params.site;

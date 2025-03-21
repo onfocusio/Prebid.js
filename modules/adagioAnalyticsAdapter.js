@@ -18,7 +18,7 @@ const events = Object.keys(EVENTS).map(key => EVENTS[key]);
 const ADAGIO_GVLID = 617;
 const VERSION = '3.0.0';
 const PREBID_VERSION = '$prebid.version$';
-const ENDPOINT = 'https://c.4dex.io/pba.gif';
+const ENDPOINT = 'https://c-testing.4dex.tech/pba.gif';
 const CURRENCY_USD = 'USD';
 const ADAGIO_CODE = 'adagio';
 
