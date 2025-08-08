@@ -3,6 +3,7 @@ import { registerBidder } from '../src/adapters/bidderFactory.js';
 import { BANNER, VIDEO, NATIVE, ADPOD } from '../src/mediaTypes.js';
 import { config } from '../src/config.js';
 import { Renderer } from '../src/Renderer.js';
+import { getGzipSetting } from '../libraries/gzipUtils/gzipUtils.js';
 import { isViewabilityMeasurable, getViewability } from '../libraries/percentInView/percentInView.js';
 import { bidderSettings } from '../src/bidderSettings.js';
 import { ortbConverter } from '../libraries/ortbConverter/converter.js';
@@ -637,25 +638,6 @@ const getPublisherId = (bids) =>
     ? bids.find(bid => bid.params?.publisherId?.trim())?.params.publisherId || null
     : null;
 
-function getGzipSetting() {
-  // Check bidder-specific configuration
-  try {
-    const gzipSetting = deepAccess(config.getBidderConfig(), 'pubmatic.gzipEnabled');
-    if (gzipSetting !== undefined) {
-      const gzipValue = String(gzipSetting).toLowerCase().trim();
-      if (gzipValue === 'true' || gzipValue === 'false') {
-        const parsedValue = gzipValue === 'true';
-        logInfo('PubMatic: Using bidder-specific gzipEnabled setting:', parsedValue);
-        return parsedValue;
-      }
-      logWarn('PubMatic: Invalid gzipEnabled value in bidder config:', gzipSetting);
-    }
-  } catch (e) { logWarn('PubMatic: Error accessing bidder config:', e); }
-
-  logInfo('PubMatic: Using default gzipEnabled setting:', DEFAULT_GZIP_ENABLED);
-  return DEFAULT_GZIP_ENABLED;
-}
-
 const _handleCustomParams = (params, conf) => {
   Object.keys(CUSTOM_PARAMS).forEach(key => {
     const value = params[key];
@@ -800,7 +782,7 @@ export const spec = {
       data: data,
       bidderRequest: bidderRequest,
       options: {
-        endpointCompression: getGzipSetting()
+        endpointCompression: getGzipSetting(BIDDER_CODE, DEFAULT_GZIP_ENABLED, {logPrefix: LOG_WARN_PREFIX})
       },
     };
     return data?.imp?.length ? serverRequest : null;
