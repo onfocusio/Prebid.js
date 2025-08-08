@@ -22,6 +22,7 @@ import { _ADAGIO } from '../libraries/adagioUtils/adagioUtils.js';
 import { config } from '../src/config.js';
 import { convertOrtbRequestToProprietaryNative } from '../src/native.js';
 import { getGptSlotInfoForAdUnitCode } from '../libraries/gptUtils/gptUtils.js';
+import { getGzipSetting } from '../libraries/gzipUtils/gzipUtils.js';
 import { registerBidder } from '../src/adapters/bidderFactory.js';
 import { userSync } from '../src/userSync.js';
 import { validateOrtbFields } from '../src/prebid.js';
@@ -739,7 +740,9 @@ export const spec = {
           prebidVersion: '$prebid.version$',
           usIfr: canSyncWithIframe
         },
-        options: {}
+        options: {
+          endpointCompression: getGzipSetting(BIDDER_CODE, false)
+        }
       };
     });
 
