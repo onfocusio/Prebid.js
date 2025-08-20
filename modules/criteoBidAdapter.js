@@ -1,4 +1,4 @@
-import {deepSetValue, isArray, logError, logWarn, parseUrl, triggerPixel, deepAccess, logInfo} from '../src/utils.js';
+import {deepSetValue, isArray, logError, logWarn, parseUrl, triggerPixel } from '../src/utils.js';
 import {registerBidder} from '../src/adapters/bidderFactory.js';
 import {BANNER, NATIVE, VIDEO} from '../src/mediaTypes.js';
 import {getStorageManager} from '../src/storageManager.js';
@@ -7,9 +7,9 @@ import {hasPurpose1Consent} from '../src/utils/gdpr.js';
 import {Renderer} from '../src/Renderer.js';
 import {OUTSTREAM} from '../src/video.js';
 import {ajax} from '../src/ajax.js';
+import { getGzipSetting } from '../libraries/gzipUtils/gzipUtils.js';
 import {ortbConverter} from '../libraries/ortbConverter/converter.js';
 import {ortb25Translator} from '../libraries/ortb2.5Translator/translator.js';
-import {config} from '../src/config.js';
 
 /**
  * @typedef {import('../src/adapters/bidderFactory.js').BidRequest} BidRequest
@@ -383,7 +383,7 @@ export const spec = {
         data,
         bidRequests,
         options: {
-          endpointCompression: getGzipSetting()
+          endpointCompression: getGzipSetting(BIDDER_CODE, DEFAULT_GZIP_ENABLED)
         },
       };
     }
@@ -431,28 +431,6 @@ export const spec = {
     }
   }
 };
-
-function getGzipSetting() {
-  try {
-    const gzipSetting = deepAccess(config.getBidderConfig(), 'criteo.gzipEnabled');
-
-    if (gzipSetting !== undefined) {
-      const gzipValue = String(gzipSetting).toLowerCase().trim();
-      if (gzipValue === 'true' || gzipValue === 'false') {
-        const parsedValue = gzipValue === 'true';
-        logInfo('Criteo: Using bidder-specific gzipEnabled setting:', parsedValue);
-        return parsedValue;
-      }
-
-      logWarn('Criteo: Invalid gzipEnabled value in bidder config:', gzipSetting);
-    }
-  } catch (e) {
-    logWarn('Criteo: Error accessing bidder config:', e);
-  }
-
-  logInfo('Criteo: Using default gzipEnabled setting:', DEFAULT_GZIP_ENABLED);
-  return DEFAULT_GZIP_ENABLED;
-}
 
 function readFromAllStorages(name) {
   const fromCookie = storage.getCookie(name);

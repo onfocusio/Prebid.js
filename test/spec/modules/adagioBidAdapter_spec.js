@@ -283,12 +283,34 @@ describe('Adagio bid adapter', () => {
       const bidderRequest = new BidderRequestBuilder().build();
 
       const requests = spec.buildRequests([bid01], bidderRequest);
+      const expectedUrl = ENDPOINT + '?orgid=1000';
 
       expect(requests).to.have.lengthOf(1);
       expect(requests[0].method).to.equal('POST');
-      expect(requests[0].url).to.equal(ENDPOINT);
-      expect(requests[0].options.contentType).to.eq('text/plain');
+      expect(requests[0].url).to.equal(expectedUrl);
       expect(requests[0].data).to.have.all.keys(expectedDataKeys);
+    });
+
+    describe('with endpointCompression', function() {
+      const tests = [
+        {
+          gzipEnabled: true
+        },
+        {
+          gzipEnabled: false
+        }
+      ];
+      tests.forEach((t) => {
+        it(`should send the endpointCompression flag set to ${t.gzipEnabled} in the request`, function() {
+          sandbox.stub(config, 'getBidderConfig').returns({ adagio: { gzipEnabled: t.gzipEnabled } });
+
+          const bid01 = new BidRequestBuilder().withParams().build();
+          const bidderRequest = new BidderRequestBuilder().build();
+          const requests = spec.buildRequests([bid01], bidderRequest);
+
+          expect(requests[0].options.endpointCompression).to.equal(t.gzipEnabled);
+        });
+      });
     });
 
     it('should use a custom generated auctionId from ortb2.site.ext.data.adg_rtd.uid when available', function() {

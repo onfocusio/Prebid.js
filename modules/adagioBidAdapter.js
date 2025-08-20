@@ -22,6 +22,7 @@ import { _ADAGIO } from '../libraries/adagioUtils/adagioUtils.js';
 import { config } from '../src/config.js';
 import { convertOrtbRequestToProprietaryNative } from '../src/native.js';
 import { getGptSlotInfoForAdUnitCode } from '../libraries/gptUtils/gptUtils.js';
+import { getGzipSetting } from '../libraries/gzipUtils/gzipUtils.js';
 import { registerBidder } from '../src/adapters/bidderFactory.js';
 import { userSync } from '../src/userSync.js';
 import { validateOrtbFields } from '../src/prebid.js';
@@ -708,9 +709,11 @@ export const spec = {
 
     // Build one request per organizationId
     const requests = Object.keys(groupedAdUnits).map(organizationId => {
+      const url = ENDPOINT + '?orgid=' + organizationId;
+
       return {
         method: 'POST',
-        url: ENDPOINT,
+        url: url,
         data: {
           organizationId: organizationId,
           hasRtd: _internal.hasRtd() ? 1 : 0,
@@ -738,7 +741,7 @@ export const spec = {
           usIfr: canSyncWithIframe
         },
         options: {
-          contentType: 'text/plain'
+          endpointCompression: getGzipSetting(BIDDER_CODE, false)
         }
       };
     });
