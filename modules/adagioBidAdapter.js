@@ -746,7 +746,9 @@ export const spec = {
           prebidVersion: '$prebid.version$',
           usIfr: canSyncWithIframe
         },
-        options: {}
+        options: {
+          endpointCompression: true
+        }
       };
     });
 
