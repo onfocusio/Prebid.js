@@ -108,11 +108,6 @@ function getPlayerName(bidRequest) {
   return _internal.isRendererPreferredFromPublisher(bidRequest) ? 'other' : 'adagio'; ;
 }
 
-function hasRtd() {
-  const rtdConfigs = config.getConfig('realTimeData.dataProviders') || [];
-  return rtdConfigs.find(provider => provider.name === 'adagio');
-};
-
 export const _internal = {
   canAccessWindowTop,
   getAdagioNs: function() {
@@ -121,7 +116,6 @@ export const _internal = {
   getDevice,
   getSite,
   getRefererInfo,
-  hasRtd,
   isRendererPreferredFromPublisher,
 };
 
@@ -547,6 +541,7 @@ export const spec = {
     }
 
     const aucId = deepAccess(bidderRequest, 'ortb2.site.ext.data.adg_rtd.uid') || generateUUID()
+    let hasRtd = false
 
     const adUnits = validBidRequests.map(rawBidRequest => {
       const bidRequest = deepClone(rawBidRequest);
@@ -663,7 +658,8 @@ export const spec = {
       const rawFeatures = {
         ...deepAccess(bidRequest, 'ortb2.site.ext.data.adg_rtd.features', {}),
         print_number: (bidRequest.bidderRequestsCount || 1).toString(),
-        adunit_position: deepAccess(bidRequest, 'ortb2Imp.ext.data.adg_rtd.adunit_position', null)
+        adunit_position: deepAccess(bidRequest, 'ortb2Imp.ext.data.adg_rtd.adunit_position', null),
+        hasRtd: deepAccess(bidRequest, 'ortb2Imp.ext.data.adg_rtd.hasRtd', false)
       }
       // Clean the features object from null or undefined values.
       bidRequest.features = Object.entries(rawFeatures).reduce((a, [k, v]) => {
@@ -693,6 +689,7 @@ export const spec = {
         rwdd: bidRequest.rwdd,
       }
 
+      hasRtd = rawFeatures.hasRtd
       return adUnit;
     });
 
@@ -720,7 +717,7 @@ export const spec = {
         url: ENDPOINT,
         data: {
           organizationId: organizationId,
-          hasRtd: _internal.hasRtd() ? 1 : 0,
+          hasRtd: hasRtd ? 1 : 0,
           secure: secure,
           device: device,
           site: site,
@@ -759,7 +756,8 @@ export const spec = {
       const response = serverResponse.body;
       if (response) {
         if (response.data) {
-          if (_internal.hasRtd()) {
+          const hasRtd = deepAccess(bidRequest, 'data.hasRtd', false)
+          if (hasRtd) {
             _internal.getAdagioNs().queue.push({
               action: 'ssp-data',
               ts: Date.now(),
