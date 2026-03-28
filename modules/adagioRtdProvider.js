@@ -287,8 +287,6 @@ function init(config, _userConsent) {
     return false;
   }
 
-  _internal.getAdagioNs().hasRtd = true;
-
   _internal.getSession().init();
 
   registerEventsForAdServers(config);
@@ -344,7 +342,8 @@ function onGetBidRequestData(bidReqConfig, callback, config) {
     uid: generateUUID(),
     pageviewId: _ADAGIO.pageviewId,
     features: { ...features },
-    session: { ..._SESSION.get() }
+    session: { ..._SESSION.get() },
+    hasRtd: true
   };
 
   deepSetValue(ortb2Site, `ext.data.adg_rtd`, ext);
@@ -663,6 +662,9 @@ function registerEventsForAdServers(config) {
   register('googletag', 'cmd', ws, 'gpt', () => {
     ws.googletag.cmd.push(() => {
       GPT_EVENTS.forEach(eventName => {
+        if (!registeredEventGuard('gpt', eventName)) {
+          return;
+        }
         ws.googletag.pubads().addEventListener(eventName, (args) => {
           _internal.getAdagioNs().queue.push({
             action: 'gpt-event',
@@ -678,6 +680,9 @@ function registerEventsForAdServers(config) {
   register('sas', 'cmd', ws, 'sas', () => {
     ws.sas.cmd.push(() => {
       SAS_EVENTS.forEach(eventName => {
+        if (!registeredEventGuard('sas', eventName)) {
+          return;
+        }
         ws.sas.events.on(eventName, (args) => {
           _internal.getAdagioNs().queue.push({
             action: 'sas-event',
@@ -694,6 +699,9 @@ function registerEventsForAdServers(config) {
   register('apntag', 'anq', ws, 'ast', () => {
     ws.apntag.anq.push(() => {
       AST_EVENTS.forEach(eventName => {
+        if (!registeredEventGuard('ast', eventName)) {
+          return;
+        }
         ws.apntag.onEvent(eventName, function () {
           _internal.getAdagioNs().queue.push({
             action: 'ast-event',
@@ -706,6 +714,23 @@ function registerEventsForAdServers(config) {
     });
   });
 };
+
+/**
+ * Checks that the given event is not already regsitered for the given adserver.
+ * Automatically adds the event to the registered events list in the global ADAGIO object.
+ * @param {string} adserver - gpt, sas, ast
+ * @param {string} eventName
+ * @returns {boolean} - true if the event can be registered, false if the event has already been registered
+ */
+function registeredEventGuard(adserver, eventName) {
+  const eventIdentifier = `${adserver}-${eventName}`;
+  const registeredEvents = _internal.getAdagioNs().registeredEvents;
+  if (registeredEvents.includes(eventIdentifier)) {
+    return false;
+  }
+  registeredEvents.push(eventIdentifier);
+  return true;
+}
 
 // --- end of internal functions ----- //
 
